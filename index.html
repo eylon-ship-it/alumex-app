@@ -117,8 +117,8 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .detail-table-col h3{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #EFF6FF}
 
 /* ── SUMMARY MODAL ── */
-#summaryModal .modal-box{max-width:900px}
-#summaryModal .modal-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:20px}
+#summaryModal .modal-box{max-width:1040px}
+#summaryModal .modal-body{flex:1;overflow:hidden;padding:0;display:flex;flex-direction:column}
 .summary-empty{text-align:center;padding:60px 20px;color:var(--muted)}
 .summary-empty p{font-size:15px;margin-top:8px}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -259,14 +259,85 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
   .logo{font-size:18px}
 }
 @media print{
-  .header,.filterbar,.modal-overlay:not(#summaryModal),.summary-actions{display:none!important}
+  .header,.filterbar,.modal-overlay:not(#summaryModal),.summary-actions,.factory-nav,.fpanel-header .fprint-btn{display:none!important}
   #summaryModal{position:static;opacity:1;pointer-events:all;padding:0}
   #summaryModal .modal-box{max-height:none;box-shadow:none;border-radius:0;transform:none;opacity:1}
-  #summaryModal .modal-body{overflow:visible}
+  #summaryModal .modal-body{overflow:visible;display:block}
+  .factory-pages{overflow:visible}
+  .fpanel{display:none!important}
+  .fpanel.print-me{display:block!important}
+  .factory-table{font-size:18px}
+  .factory-table .qty-cell{font-size:26px}
 }
+/* ── LOGIN ── */
+#loginOverlay{position:fixed;inset:0;background:var(--primary);z-index:9999;display:flex;align-items:center;justify-content:center}
+#loginOverlay.hidden{display:none}
+.login-box{background:#fff;border-radius:20px;padding:44px 36px;width:320px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.login-logo{font-size:38px;font-weight:700;color:var(--primary);letter-spacing:-1px;margin-bottom:4px}
+.login-logo span{color:#E63B2E}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.login-pin{width:100%;padding:14px;font-size:26px;text-align:center;border:2px solid var(--border);border-radius:10px;font-family:inherit;letter-spacing:10px;font-weight:700;outline:none;transition:border-color 0.15s}
+.login-pin:focus{border-color:var(--primary)}
+.login-pin.error{border-color:#EF4444;background:#fff5f5;animation:shake 0.3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.login-btn{width:100%;margin-top:14px;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background 0.15s}
+.login-btn:hover{background:var(--primary-dark)}
+.login-err{color:#EF4444;font-size:13px;margin-top:10px;min-height:18px}
+/* ── PIN CONFIRM ── */
+#pinModal .modal-box{max-width:360px}
+.pin-box{padding:24px;text-align:center}
+.pin-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.pin-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.pin-inp{width:100%;padding:12px;font-size:22px;text-align:center;border:2px solid var(--border);border-radius:10px;font-family:inherit;letter-spacing:6px;font-weight:700;outline:none;transition:border-color 0.15s}
+.pin-inp:focus{border-color:var(--primary)}
+.pin-inp.error{border-color:#EF4444;background:#fff5f5;animation:shake 0.3s}
+.pin-actions{display:flex;gap:10px;margin-top:16px}
+.pin-err{color:#EF4444;font-size:12px;margin-top:8px;min-height:16px}
+/* ── DETAIL SAVE FOOTER ── */
+.detail-save-footer{padding:10px 16px;border-top:1px solid var(--border);background:#f9f9f7;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:10px}
+.save-unit-btn{padding:8px 20px;background:#059669;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.save-unit-btn:hover{background:#047857}
+.save-unit-notice{font-size:12px;color:#059669;font-weight:600;display:none}
+.save-unit-notice.show{display:block}
+/* ── FACTORY LISTS ── */
+.factory-modal-body{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.factory-nav{display:flex;gap:0;border-bottom:2px solid var(--border);overflow-x:auto;flex-shrink:0;background:#fff;padding:0 12px}
+.factory-nav::-webkit-scrollbar{height:3px}.factory-nav::-webkit-scrollbar-thumb{background:#ddd;border-radius:3px}
+.ftab{padding:0 16px;height:46px;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;white-space:nowrap}
+.ftab:hover{color:var(--text)}
+.ftab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:700}
+.factory-pages{flex:1;overflow-y:auto}
+.fpanel{display:none;padding:20px}
+.fpanel.active{display:block}
+.fpanel-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:10px}
+.fpanel-title{font-size:18px;font-weight:700;color:var(--primary)}
+.fpanel-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.fprint-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:inherit;font-size:13px;color:#444;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
+.fprint-btn:hover{background:#f4f4f2;border-color:#bbb}
+.factory-table{width:100%;border-collapse:collapse;font-size:16px}
+.factory-table th{text-align:right;padding:10px 14px;font-size:12px;font-weight:700;border-bottom:3px solid var(--primary);color:var(--primary);background:#EFF6FF}
+.factory-table th:last-child{text-align:center}
+.factory-table td{padding:11px 14px;border-bottom:1px solid #eee;vertical-align:middle}
+.factory-table .qty-cell{font-size:22px;font-weight:900;color:var(--primary);text-align:center}
+.factory-table tbody tr:hover{background:#f5f9ff}
+.factory-table .ftotal td{background:var(--primary);color:#fff;font-weight:700;font-size:13px}
+.factory-table .ftotal .qty-cell{color:#fff;font-size:22px}
+.fempty{text-align:center;padding:50px;color:var(--muted);font-size:15px}
+.sum-legacy-wrap{padding:20px;overflow-y:auto}
 </style>
 </head>
 <body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" class="hidden">
+  <div class="login-box">
+    <div class="login-logo">Alum<span>ex</span></div>
+    <div class="login-sub">מערכת רשימת חיתוך — Alumex</div>
+    <input class="login-pin" type="password" id="loginPinInput" maxlength="4" inputmode="numeric" placeholder="• • • •" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off">
+    <button class="login-btn" onclick="doLogin()">כניסה</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
 
 <!-- HEADER -->
 <header class="header">
@@ -330,7 +401,7 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
       </div>
       <div class="proj-field">
         <label>גובה מגירה ראשונה (מ"מ)</label>
-        <input type="number" id="projFieldFDH" placeholder="לפי קטלוג" min="100" max="500">
+        <input type="text" id="projFieldFDH" placeholder="לפי קטלוג" inputmode="numeric" pattern="[0-9]*">
         <div class="field-hint">גובה מסגרת המגירה הקטנה ביותר — הפרמטר העיצובי שממנו נגזרות שאר המגירות.</div>
       </div>
       <input type="hidden" id="projEditId" value="">
@@ -439,6 +510,10 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
       </div>
       <div class="detail-table-col" id="detailTable"></div>
     </div>
+    <div class="detail-save-footer">
+      <span class="save-unit-notice" id="saveUnitNotice">✓ השינויים נשמרו בהצלחה</span>
+      <button class="save-unit-btn" onclick="promptSaveUnit()">לחץ כאן לשמירה ▶</button>
+    </div>
   </div>
 </div>
 
@@ -456,6 +531,28 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
       </div>
     </div>
     <div class="modal-body" id="summaryBody"></div>
+  </div>
+</div>
+
+<!-- PIN CONFIRM MODAL -->
+<div class="modal-overlay" id="pinModal" onclick="handleOverlayClick(event,'pinModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">אישור שמירה</div>
+      <div class="modal-header-btns">
+        <button class="icon-btn" onclick="closeModal('pinModal')">✕</button>
+      </div>
+    </div>
+    <div class="pin-box">
+      <div class="pin-title">הזן קוד אישור לשמירת השינויים</div>
+      <div class="pin-sub">הזן קוד 4 ספרות כדי לאשר את שינויי מפרט היחידה</div>
+      <input class="pin-inp" type="password" id="pinInput" maxlength="4" inputmode="numeric" placeholder="• • • •" onkeydown="if(event.key==='Enter')confirmPin()" autocomplete="off">
+      <div class="pin-err" id="pinErr"></div>
+      <div class="pin-actions">
+        <button class="proj-cancel-btn" style="flex:1" onclick="closeModal('pinModal')">ביטול</button>
+        <button class="proj-submit-btn" style="flex:1" onclick="confirmPin()">אישור ושמירה</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -696,6 +793,7 @@ function loadUnitOverrides() {
 //  INIT
 // ═══════════════════════════════════════════════
 function init() {
+  checkLogin();
   loadProfileOverrides();
   loadUnitOverrides();
   loadProjects();
@@ -1274,113 +1372,112 @@ function editDimCell(event, unitId, key, currentVal, linkedKey) {
 function openSummary() {
   const active = unitsData.filter(u => (selections[u.id] || 0) > 0);
   const body = document.getElementById('summaryBody');
-  // Show project info in modal sub-title
   const proj = getActiveProject();
   const projSub = document.getElementById('summaryProjSub');
   if (proj && projSub) {
     projSub.textContent = `${proj.name}${proj.salesforce ? ' · ' + proj.salesforce : ''}${proj.magic ? ' · מגיק ' + proj.magic : ''}`;
-  } else if (projSub) {
-    projSub.textContent = '';
-  }
+  } else if (projSub) { projSub.textContent = ''; }
 
   if (!active.length) {
-    body.innerHTML = `<div class="summary-empty">
+    body.innerHTML = `<div class="sum-legacy-wrap"><div class="summary-empty">
       <div style="font-size:40px">📋</div>
       <p>לא נבחרו יחידות עדיין.<br>חזור לקטלוג ובחר כמויות.</p>
-    </div>`;
+    </div></div>`;
     openModal('summaryModal');
     return;
   }
 
-  // Metrics
-  const fh = getActiveFrontHeight();
+  const fh  = getActiveFrontHeight();
   const fdh = getActiveFirstDrawerHeight();
-  const totalUnits = active.reduce((s, u) => s + (selections[u.id] || 0), 0);
-  const allProfs = buildSummaryData(active, fh, fdh);
-  const totalProfs = allProfs.filter(r => r.len > 0).reduce((s, r) => s + r.qty, 0);
-  const uniqueSKUs = new Set(allProfs.filter(r => r.len > 0).map(r => r.sku)).size;
-  const totalHW = allProfs.filter(r => r.len === 0).reduce((s, r) => s + r.qty, 0);
+  const lists = buildFactoryLists(active, fh, fdh);
 
-  // Selected units chips
+  const projBar = proj
+    ? `${proj.name}${proj.magic ? ' · מגיק ' + proj.magic : ''}${proj.salesforce ? ' · ' + proj.salesforce : ''} · גובה חזית ${fh || 750} מ"מ`
+    : '';
+
+  const tabs = [
+    { id: 'loko',   label: 'לוקובונד + גב',       items: lists.loko,   type: 'panel'   },
+    { id: 'front',  label: 'חזיתות פורצלן',       items: lists.front,  type: 'panel'   },
+    { id: 'frame',  label: 'מסגרות + ידיות',      items: lists.frame,  type: 'profile' },
+    { id: 'body',   label: 'גוף ופרופילים',        items: lists.body,   type: 'profile' },
+    { id: 'drawer', label: 'פרופילי מגירות',      items: lists.drawer, type: 'profile' },
+    { id: 'overview', label: 'סיכום כללי',        items: [],           type: 'overview' },
+  ];
+
+  const navHTML = `<div class="factory-nav">${tabs.map((t,i) =>
+    `<button class="ftab${i===0?' active':''}" data-ftab="${t.id}" onclick="switchFactoryTab('${t.id}')">${t.label}${t.type!=='overview'?` <small style="opacity:0.6">(${t.items.length})</small>`:''}</button>`
+  ).join('')}</div>`;
+
+  // Overview tab content (legacy summary)
+  const allProfs = buildSummaryData(active, fh, fdh);
+  const totalUnits = active.reduce((s,u)=>s+(selections[u.id]||0),0);
+  const totalProfs = allProfs.filter(r=>r.len>0).reduce((s,r)=>s+r.qty,0);
+  const uniqueSKUs = new Set(allProfs.filter(r=>r.len>0).map(r=>r.sku)).size;
+  const totalHW    = allProfs.filter(r=>r.len===0).reduce((s,r)=>s+r.qty,0);
   const chips = active.map(u => {
     const q = selections[u.id];
     return `<div class="su-chip">
       <img src="imgs/unit_${String(u.imgIdx).padStart(2,'0')}.jpg" alt="${u.name}">
-      <div>
-        <div style="font-weight:600;font-size:12px">${u.name}</div>
-        <div style="font-size:11px;color:#888">${u.code}</div>
-      </div>
+      <div><div style="font-weight:600;font-size:12px">${u.name}</div><div style="font-size:11px;color:#888">${u.code}</div></div>
       <strong>×${q}</strong>
     </div>`;
   }).join('');
-
-  // Summary table
-  const profRows = allProfs.filter(r => r.len > 0);
-  const hwRows = allProfs.filter(r => r.len === 0);
-  let tableHTML = `<table class="cut-table">
-    <thead><tr>
-      <th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>סה"כ כמות</th>
-    </tr></thead><tbody>`;
-
-  if (profRows.length) {
-    tableHTML += `<tr class="table-section-row"><td colspan="4">פרופילים לחיתוך</td></tr>`;
-    profRows.forEach(r => {
-      tableHTML += `<tr>
-        <td><span class="sku-pill">${r.sku}</span></td>
-        <td>${r.label || profileDesc[r.sku] || ''}</td>
-        <td><b>${r.len}</b></td>
-        <td><b>${r.qty}</b></td>
-      </tr>`;
-    });
-    tableHTML += `<tr class="table-total-row"><td colspan="3">סה"כ פרופילים לחיתוך</td><td>${totalProfs}</td></tr>`;
-  }
-  if (hwRows.length) {
-    tableHTML += `<tr class="table-section-row"><td colspan="4">חומרה ומגירות</td></tr>`;
-    hwRows.forEach(r => {
-      tableHTML += `<tr>
-        <td><span class="sku-pill hw">${r.sku}</span></td>
-        <td>${r.label || profileDesc[r.sku] || ''}</td>
-        <td>—</td>
-        <td><b>${r.qty}</b></td>
-      </tr>`;
-    });
-  }
-  tableHTML += `</tbody></table>`;
-
-  // Build project info block
   let projBlock = '';
   if (proj) {
     projBlock = `<div class="sum-proj-header">
       <div class="sum-proj-field"><div class="sum-proj-label">לקוח</div><div class="sum-proj-val">${proj.name}</div></div>
       ${proj.magic ? `<div class="sum-proj-field"><div class="sum-proj-label">מגיק</div><div class="sum-proj-val">${proj.magic}</div></div>` : ''}
       ${proj.salesforce ? `<div class="sum-proj-field"><div class="sum-proj-label">Salesforce</div><div class="sum-proj-val">${proj.salesforce}</div></div>` : ''}
-      <div class="sum-proj-field"><div class="sum-proj-label">סוג חזית</div><div class="sum-proj-val">${proj.frontType || '—'}</div></div>
-      <div class="sum-proj-field"><div class="sum-proj-label">גובה חזית</div><div class="sum-proj-val">${proj.frontHeight || 750} מ"מ</div></div>
-      <div class="sum-proj-field"><div class="sum-proj-label">תאריך</div><div class="sum-proj-val">${proj.createdAt || ''}</div></div>
+      <div class="sum-proj-field"><div class="sum-proj-label">סוג חזית</div><div class="sum-proj-val">${proj.frontType||'—'}</div></div>
+      <div class="sum-proj-field"><div class="sum-proj-label">גובה חזית</div><div class="sum-proj-val">${proj.frontHeight||750} מ"מ</div></div>
+      <div class="sum-proj-field"><div class="sum-proj-label">תאריך</div><div class="sum-proj-val">${proj.createdAt||''}</div></div>
     </div>`;
   }
-
-  body.innerHTML = `
-    ${projBlock}
+  const profRows = allProfs.filter(r=>r.len>0);
+  const hwRows   = allProfs.filter(r=>r.len===0);
+  let tableHTML = `<table class="cut-table"><thead><tr><th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>סה"כ כמות</th></tr></thead><tbody>`;
+  if (profRows.length) {
+    tableHTML += `<tr class="table-section-row"><td colspan="4">פרופילים לחיתוך</td></tr>`;
+    profRows.forEach(r => { tableHTML += `<tr><td><span class="sku-pill">${r.sku}</span></td><td>${r.label||profileDesc[r.sku]||''}</td><td><b>${r.len}</b></td><td><b>${r.qty}</b></td></tr>`; });
+    tableHTML += `<tr class="table-total-row"><td colspan="3">סה"כ פרופילים</td><td>${totalProfs}</td></tr>`;
+  }
+  if (hwRows.length) {
+    tableHTML += `<tr class="table-section-row"><td colspan="4">חומרה ומגירות</td></tr>`;
+    hwRows.forEach(r => { tableHTML += `<tr><td><span class="sku-pill hw">${r.sku}</span></td><td>${r.label||profileDesc[r.sku]||''}</td><td>—</td><td><b>${r.qty}</b></td></tr>`; });
+  }
+  tableHTML += `</tbody></table>`;
+  const overviewContent = `${projBlock}
     <div class="metrics">
       <div class="metric"><div class="metric-val">${totalUnits}</div><div class="metric-label">סה"כ ארונות</div></div>
       <div class="metric"><div class="metric-val">${totalProfs}</div><div class="metric-label">פרופילים לחיתוך</div></div>
       <div class="metric"><div class="metric-val">${uniqueSKUs}</div><div class="metric-label">מק"טים שונים</div></div>
       <div class="metric"><div class="metric-val">${totalHW}</div><div class="metric-label">יחידות חומרה</div></div>
     </div>
-    <div>
-      <div class="section-title">יחידות נבחרות</div>
-      <div class="selected-units">${chips}</div>
-    </div>
-    <div>
-      <div class="section-title">טבלת סיכום</div>
-      ${tableHTML}
-    </div>
+    <div><div class="section-title">יחידות נבחרות</div><div class="selected-units">${chips}</div></div>
+    <div><div class="section-title">טבלת סיכום</div>${tableHTML}</div>
     <div class="summary-actions">
       <button class="action-btn primary" onclick="exportCSV()">⬇ ייצוא CSV</button>
       <button class="action-btn" onclick="window.print()">🖨 הדפסה</button>
     </div>`;
 
+  // Build all factory pages
+  const pagesHTML = tabs.map((t, i) => {
+    let content;
+    if (t.type === 'overview') {
+      content = `<div style="display:flex;flex-direction:column;gap:20px">${overviewContent}</div>`;
+    } else if (t.type === 'panel') {
+      content = buildFactoryPanelTable(t.items);
+    } else {
+      content = buildFactoryProfTable(t.items);
+    }
+    const header = t.type !== 'overview' ? `<div class="fpanel-header">
+      <div><div class="fpanel-title">${t.label}</div><div class="fpanel-meta">${projBar}</div></div>
+      <button class="fprint-btn" onclick="printFactoryTab('${t.id}')">🖨 הדפס רשימה זו</button>
+    </div>` : '';
+    return `<div class="fpanel${i===0?' active':''}" id="fp-${t.id}">${header}${content}</div>`;
+  }).join('');
+
+  body.innerHTML = navHTML + `<div class="factory-pages">${pagesHTML}</div>`;
   openModal('summaryModal');
 }
 
@@ -1800,6 +1897,175 @@ function renderProjectHeader() {
 
 function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════
+const APP_PIN = '5555';
+
+function checkLogin() {
+  if (sessionStorage.getItem('alumex_auth') !== '1') {
+    const ov = document.getElementById('loginOverlay');
+    ov.classList.remove('hidden');
+    setTimeout(() => document.getElementById('loginPinInput').focus(), 150);
+  }
+}
+
+function doLogin() {
+  const inp = document.getElementById('loginPinInput');
+  if (inp.value === APP_PIN) {
+    sessionStorage.setItem('alumex_auth', '1');
+    document.getElementById('loginOverlay').classList.add('hidden');
+    inp.value = '';
+    document.getElementById('loginErr').textContent = '';
+  } else {
+    document.getElementById('loginErr').textContent = 'קוד שגוי — נסה שנית';
+    inp.classList.add('error');
+    inp.value = '';
+    setTimeout(() => { inp.classList.remove('error'); inp.focus(); }, 600);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  SAVE WITH PIN
+// ═══════════════════════════════════════════════
+function promptSaveUnit() {
+  const pinInput = document.getElementById('pinInput');
+  pinInput.value = '';
+  document.getElementById('pinErr').textContent = '';
+  pinInput.classList.remove('error');
+  openModal('pinModal');
+  setTimeout(() => pinInput.focus(), 150);
+}
+
+function confirmPin() {
+  const inp = document.getElementById('pinInput');
+  if (inp.value === APP_PIN) {
+    saveCurrentProject();
+    closeModal('pinModal');
+    inp.value = '';
+    const notice = document.getElementById('saveUnitNotice');
+    notice.classList.add('show');
+    setTimeout(() => notice.classList.remove('show'), 3000);
+  } else {
+    document.getElementById('pinErr').textContent = 'קוד שגוי — נסה שנית';
+    inp.classList.add('error');
+    inp.value = '';
+    setTimeout(() => { inp.classList.remove('error'); inp.focus(); }, 600);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  FACTORY LISTS
+// ═══════════════════════════════════════════════
+const BODY_SKUS   = new Set(['B01','B02','B03','E07','E02','BR40','E08']);
+const FRAME_SKUS  = new Set(['FD03','FD04']);
+const DRAWER_SKUS = new Set(['FD01','D01','D02','D03']);
+const FRAME_HW    = new Set(['CH.3138','808BR','808BR18']);
+
+function buildFactoryLists(active, frontHeight, firstDrawerHeight) {
+  const maps = { loko: new Map(), body: new Map(), frame: new Map(), front: new Map(), drawer: new Map() };
+
+  function addPanel(cat, item) {
+    const k = `${item.barcode}|${item.len}|${item.width}`;
+    if (maps[cat].has(k)) maps[cat].get(k).qty += item.qty;
+    else maps[cat].set(k, { ...item });
+  }
+  function addProf(cat, item) {
+    const k = `${item.sku}|${item.len}|${item.label}`;
+    if (maps[cat].has(k)) maps[cat].get(k).qty += item.qty;
+    else maps[cat].set(k, { ...item });
+  }
+
+  active.forEach(u => {
+    const qty = selections[u.id] || 0;
+    const fh  = frontHeight;
+    const fdh = (unitDimSettings[u.id]?.firstDrawerHeight) || firstDrawerHeight;
+
+    // Panels
+    const panels = computeScaledPanels(u, fh, fdh);
+    panels.forEach((p, pi) => {
+      const vLen = getDimOverride(u.id, `pan${pi}_len`, p.len);
+      const vWid = getDimOverride(u.id, `pan${pi}_wid`, p.width);
+      const item = { barcode: p.barcode||'—', label: p.label||'', len: vLen, width: vWid, qty: (p.qty||1)*qty };
+      const lbl = p.label || '';
+      if (lbl.includes('לוקובונד') || lbl === 'גב') addPanel('loko', item);
+      else if (lbl.includes('חזית')) addPanel('front', item);
+    });
+
+    // Profiles
+    const profs = getScaledProfiles(u, fh, fdh);
+    profs.forEach((p, pi) => {
+      const vLen = getDimOverride(u.id, `p${pi}_${p.sku}`, p.len);
+      const item = { sku: p.sku, label: p.label || profileDesc[p.sku] || '', len: vLen, qty: p.qty * qty };
+      if (p.len === 0) {
+        if (FRAME_HW.has(p.sku)) addProf('frame', item);
+        else addProf('drawer', item);
+      } else if (BODY_SKUS.has(p.sku))   addProf('body',   item);
+      else if (FRAME_SKUS.has(p.sku))    addProf('frame',  item);
+      else if (DRAWER_SKUS.has(p.sku))   addProf('drawer', item);
+      else                               addProf('body',   item);
+    });
+  });
+
+  const sortPanel = arr => arr.sort((a,b) => (a.label.localeCompare(b.label)) || (b.len - a.len));
+  const sortProf  = arr => arr.sort((a,b) => a.sku.localeCompare(b.sku) || (b.len - a.len));
+
+  return {
+    loko:   sortPanel([...maps.loko.values()]),
+    body:   sortProf([...maps.body.values()]),
+    frame:  sortProf([...maps.frame.values()]),
+    front:  sortPanel([...maps.front.values()]),
+    drawer: sortProf([...maps.drawer.values()]),
+  };
+}
+
+function buildFactoryPanelTable(items) {
+  if (!items.length) return `<div class="fempty">אין פריטים בקטגוריה זו</div>`;
+  const totalQty = items.reduce((s, x) => s + x.qty, 0);
+  const rows = items.map(p => `<tr>
+    <td style="font-size:13px;color:#999">${p.barcode}</td>
+    <td><b style="font-size:17px">${p.label}</b></td>
+    <td><b>${p.len}</b></td>
+    <td>${p.width}</td>
+    <td class="qty-cell">${p.qty}</td>
+  </tr>`).join('');
+  return `<table class="factory-table">
+    <thead><tr><th>ברקוד</th><th>תיאור</th><th>אורך (מ"מ)</th><th>רוחב (מ"מ)</th><th>כמות</th></tr></thead>
+    <tbody>${rows}
+    <tr class="ftotal"><td colspan="4"><b>סה"כ</b></td><td class="qty-cell">${totalQty}</td></tr>
+    </tbody></table>`;
+}
+
+function buildFactoryProfTable(items) {
+  if (!items.length) return `<div class="fempty">אין פריטים בקטגוריה זו</div>`;
+  const totalQty = items.reduce((s, x) => s + x.qty, 0);
+  const rows = items.map(p => {
+    const isHW = p.len === 0;
+    return `<tr>
+      <td><span class="sku-pill${isHW?' hw':''}" style="font-size:13px;padding:4px 10px">${p.sku}</span></td>
+      <td><b style="font-size:17px">${p.label}</b></td>
+      <td><b>${isHW ? '—' : p.len}</b></td>
+      <td class="qty-cell">${p.qty}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="factory-table">
+    <thead><tr><th>מק"ט</th><th>תיאור</th><th>אורך (מ"מ)</th><th>כמות</th></tr></thead>
+    <tbody>${rows}
+    <tr class="ftotal"><td colspan="3"><b>סה"כ</b></td><td class="qty-cell">${totalQty}</td></tr>
+    </tbody></table>`;
+}
+
+function switchFactoryTab(tabId) {
+  document.querySelectorAll('.ftab').forEach(b => b.classList.toggle('active', b.dataset.ftab === tabId));
+  document.querySelectorAll('.fpanel').forEach(p => p.classList.toggle('active', p.id === 'fp-' + tabId));
+}
+
+function printFactoryTab(tabId) {
+  document.querySelectorAll('.fpanel').forEach(p => p.classList.remove('print-me'));
+  const page = document.getElementById('fp-' + tabId);
+  if (page) { page.classList.add('print-me'); window.print(); page.classList.remove('print-me'); }
 }
 
 // ═══════════════════════════════════════════════
