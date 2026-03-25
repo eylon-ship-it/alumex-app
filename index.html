@@ -884,6 +884,52 @@ function computeFrontHeights(unit, totalHeight, firstDrawerHeight) {
   }));
 }
 
+// ─── חישוב פאנלים מחושבים (חזיתות + לוקובונד + גב) ──────────
+// מחזיר את ה-panels עם גובהים מחושבים לפי total_height
+function computeScaledPanels(unit, totalHeight, firstDrawerHeight) {
+  const cabinetH = getCabinetHeight(unit);
+  const panels   = unit.panels || [];
+  if (!panels.length) return [];
+  if (!totalHeight || totalHeight === cabinetH) return panels;
+
+  const frontData = computeFrontHeights(unit, totalHeight, firstDrawerHeight);
+  if (!frontData) return panels;
+
+  // מפה: גובה מסגרת catalog → גובה חדש (ממוינים בסדר עולה)
+  const catalogFronts = panels
+    .filter(p => (p.label||'').includes('חזית') && !(p.label||'').includes('לוקובונד'))
+    .map(p => p.len).sort((a,b) => a - b);
+
+  const newFrames = frontData.map(f => f.frame).sort((a,b) => a - b);
+  const newGlues  = frontData.map(f => f.glue).sort((a,b) => a - b);
+
+  // frameMap: old_catalog_frame → new_frame
+  const frameMap = new Map();
+  const glueMap  = new Map();
+  catalogFronts.forEach((oldFrame, i) => {
+    frameMap.set(oldFrame, newFrames[i] !== undefined ? newFrames[i] : oldFrame);
+    // corresponding glue = old_frame - 13
+    glueMap.set(oldFrame - GLUE_DEDUCTION, newGlues[i] !== undefined ? newGlues[i] : oldFrame - GLUE_DEDUCTION);
+  });
+
+  return panels.map(p => {
+    const lbl = p.label || '';
+    if (lbl.includes('חזית') && !lbl.includes('לוקובונד')) {
+      const newLen = frameMap.get(p.len);
+      if (newLen !== undefined && newLen !== p.len) {
+        return { ...p, len: Math.round(newLen * 10) / 10, _scaled: true };
+      }
+    } else if (lbl.includes('לוקובונד')) {
+      const newLen = glueMap.get(p.len);
+      if (newLen !== undefined && newLen !== p.len) {
+        return { ...p, len: Math.round(newLen * 10) / 10, _scaled: true };
+      }
+    }
+    // גב ורכיבים אחרים — לא משתנים עם גובה החזית
+    return p;
+  });
+}
+
 // ─── עדכון פרופילים עם גובהים נכונים ────────────────────────
 function getScaledProfiles(unit, totalHeight, firstDrawerHeight) {
   const cabinetH = getCabinetHeight(unit);
@@ -1042,12 +1088,13 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh
       </div>`;
     }
 
-    // ─── Front cut dimensions table ───────────────────────────
-    if (frontData && frontData.length) {
-      const hasNonInt = frontData.some(f => f.isNonInteger);
+    // ─── All panel items (fronts, lokobond, back) ─────────────
+    const scaledPanels = computeScaledPanels(unit, totalH, effectiveFdh);
+    if (scaledPanels.length) {
+      const hasNonInt = scaledPanels.some(p => p._scaled && !Number.isInteger(p.len));
       const fhLabel = (totalH !== cabinetH) ? ` <span class="fh-badge">גובה ${totalH} מ"מ</span>` : '';
       const overrideBadge = hasOverrides ? ` <span style="font-size:10px;background:#D1FAE5;color:#059669;padding:2px 7px;border-radius:10px;font-weight:600">מותאם אישית</span>` : '';
-      html += `<h3>מידות חיתוך חזיתות${fhLabel}${overrideBadge}`;
+      html += `<h3>פרטי חיתוך חזיתות${fhLabel}${overrideBadge}`;
       if (hasOverrides) html += ` <button class="reset-overrides-btn" onclick="resetAllOverrides('${uid}')" style="margin-right:6px">↺ אפס הכל</button>`;
       html += `</h3>`;
       if (hasNonInt) {
@@ -1055,38 +1102,29 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh
       }
       html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">לחץ על מידה לעריכה ידנית</div>`;
       html += `<table class="cut-table"><thead><tr>
-        <th>חזית</th><th>גובה מסגרת</th><th>גובה הדבקה</th><th>רוחב מסגרת</th><th>רוחב הדבקה</th>
+        <th>ברקוד</th><th>פריט</th><th>אורך (מ"מ)</th><th>רוחב (מ"מ)</th><th>כמות ליח'</th><th>סה"כ</th>
       </tr></thead><tbody>`;
 
-      const baseFrameW = unitWidth - 8;
-      const baseGlueW  = unitWidth - 4;
+      scaledPanels.forEach((p, pi) => {
+        const keyLen = `pan${pi}_len`;
+        const keyW   = `pan${pi}_wid`;
+        const vLen   = getDimOverride(uid, keyLen, p.len);
+        const vWid   = getDimOverride(uid, keyW,   p.width);
+        const total  = (p.qty || 1) * qty;
+        const isOvrLen = unitDimSettings[uid]?.overrides?.[keyLen] !== undefined;
+        const isOvrWid = unitDimSettings[uid]?.overrides?.[keyW]   !== undefined;
+        const scaledStyle = (p._scaled && !isOvrLen) ? ' style="color:#D97706"' : '';
 
-      frontData.forEach((f, i) => {
-        const label = frontData.length === 1 ? 'דלת' : (i === 0 ? `מגירה ${i+1} (קטנה)` : `מגירה ${i+1}`);
-        const warn  = f.isNonInteger ? ' style="color:#D97706"' : '';
-
-        const keys = {
-          frame:  `f${i}_frame`,  glue:   `f${i}_glue`,
-          frameW: `f${i}_frameW`, glueW:  `f${i}_glueW`
-        };
-        const vals = {
-          frame:  getDimOverride(uid, keys.frame,  Number.isInteger(f.frame)  ? f.frame  : parseFloat(f.frame.toFixed(1))),
-          glue:   getDimOverride(uid, keys.glue,   Number.isInteger(f.glue)   ? f.glue   : parseFloat(f.glue.toFixed(1))),
-          frameW: getDimOverride(uid, keys.frameW, baseFrameW),
-          glueW:  getDimOverride(uid, keys.glueW,  baseGlueW)
-        };
-
-        const cell = (key, v, warn) => {
-          const isOvr = (unitDimSettings[uid] && unitDimSettings[uid].overrides && unitDimSettings[uid].overrides[key] !== undefined);
-          return `<td${warn||''}><span class="dim-cell${isOvr?' overridden':''}" onclick="editDimCell(event,'${uid}','${key}',${v})">${v}</span></td>`;
-        };
+        const cellLen = `<span class="dim-cell${isOvrLen?' overridden':''}" onclick="editDimCell(event,'${uid}','${keyLen}',${vLen})"><b>${Number.isInteger(vLen)?vLen:parseFloat(vLen.toFixed(1))}</b></span>`;
+        const cellWid = `<span class="dim-cell${isOvrWid?' overridden':''}" onclick="editDimCell(event,'${uid}','${keyW}',${vWid})"><b>${vWid}</b></span>`;
 
         html += `<tr>
-          <td>${label}</td>
-          ${cell(keys.frame,  vals.frame,  warn)}
-          ${cell(keys.glue,   vals.glue,   warn)}
-          ${cell(keys.frameW, vals.frameW, '')}
-          ${cell(keys.glueW,  vals.glueW,  '')}
+          <td style="font-size:11px;color:var(--muted)">${p.barcode||'—'}</td>
+          <td>${p.label||''}</td>
+          <td${scaledStyle}>${cellLen}</td>
+          <td>${cellWid}</td>
+          <td>${p.qty||1}</td>
+          <td><b>${total}</b></td>
         </tr>`;
       });
       html += `</tbody></table>`;
