@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alumex — רשימת חיתוך</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1B4F8A;
+  --primary-dark:#153d6b;
+  --bg:#F5F5F3;
+  --white:#fff;
+  --border:#E5E5E3;
+  --text:#1a1a1a;
+  --muted:#888;
+  --radius:12px;
+  --shadow:0 2px 8px rgba(0,0,0,0.08);
+  --shadow-hover:0 6px 20px rgba(0,0,0,0.13);
+}
+body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text);direction:rtl;overflow-x:hidden;min-height:100vh}
+
+/* ── HEADER ── */
+.header{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.logo{font-size:22px;font-weight:700;color:var(--primary);letter-spacing:-0.5px;white-space:nowrap}
+.logo span{color:#E63B2E}
+.header-spacer{flex:1}
+.summary-btn{display:flex;align-items:center;gap:8px;padding:8px 18px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background 0.15s}
+.summary-btn:hover{background:var(--primary-dark)}
+.summary-btn .badge{background:rgba(255,255,255,0.25);border-radius:20px;padding:1px 8px;font-size:12px;font-weight:700}
+.clear-btn{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.clear-btn:hover{border-color:#ccc;color:#555}
+
+/* ── FILTER BAR ── */
+.filterbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:60px;z-index:99}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.cat-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--white);color:#555;white-space:nowrap;transition:all 0.15s}
+.cat-btn:hover{background:#f0f0ee}
+.cat-btn.active{color:#fff;border-color:transparent}
+.cat-btn[data-cat="הכל"].active{background:var(--primary)}
+.cat-btn[data-cat="אחסון"].active{background:#3B82F6}
+.cat-btn[data-cat="גריל"].active{background:#EF4444}
+.cat-btn[data-cat="כיור"].active{background:#06B6D4}
+.cat-btn[data-cat="כיריים"].active{background:#F97316}
+.cat-btn[data-cat="פינה"].active{background:#8B5CF6}
+.cat-btn[data-cat="פלנצה"].active{background:#10B981}
+.cat-btn[data-cat="תנור"].active{background:#F59E0B}
+.search-wrap{flex:1;min-width:180px;max-width:300px;position:relative}
+.search-wrap::before{content:"🔍";position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;opacity:0.5}
+.search-input{width:100%;padding:7px 32px 7px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:#fafafa;color:var(--text)}
+.search-input:focus{outline:none;border-color:var(--primary);background:#fff}
+.search-input::placeholder{color:#bbb}
+
+/* ── GRID ── */
+.page{padding:20px 24px 80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.no-results{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-size:15px}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:var(--radius);border:2px solid transparent;overflow:hidden;transition:transform 0.15s,box-shadow 0.15s,border-color 0.15s;position:relative;display:flex;flex-direction:column}
+.card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.card.selected{border-color:var(--primary)}
+.card-check{position:absolute;top:10px;left:10px;width:22px;height:22px;background:var(--primary);border-radius:50%;color:#fff;font-size:12px;display:none;align-items:center;justify-content:center;font-weight:700;z-index:2}
+.card.selected .card-check{display:flex}
+.card-img-wrap{position:relative;background:#F9F9F7;border-bottom:1px solid var(--border);cursor:pointer}
+.card-img{width:100%;height:150px;object-fit:contain;display:block;padding:8px}
+.cat-tag{position:absolute;top:8px;right:8px;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;color:#fff}
+.cat-tag[data-cat="אחסון"]{background:#3B82F6}
+.cat-tag[data-cat="גריל"]{background:#EF4444}
+.cat-tag[data-cat="כיור"]{background:#06B6D4}
+.cat-tag[data-cat="כיריים"]{background:#F97316}
+.cat-tag[data-cat="פינה"]{background:#8B5CF6}
+.cat-tag[data-cat="פלנצה"]{background:#10B981}
+.cat-tag[data-cat="תנור"]{background:#F59E0B}
+.card-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:4px}
+.card-name{font-size:13px;font-weight:700;line-height:1.35;cursor:pointer}
+.card-name:hover{color:var(--primary)}
+.card-code{font-size:11px;color:#aaa;font-weight:400}
+.card-dims{font-size:11px;color:#bbb}
+.qty-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #f0f0ee}
+.qty-label{font-size:12px;color:var(--muted);flex:1}
+.qty-ctrl{display:flex;align-items:center;gap:6px}
+.qty-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all 0.15s;color:#555;flex-shrink:0}
+.qty-btn.minus:hover{border-color:#EF4444;color:#EF4444;background:#fff5f5}
+.qty-btn.plus:hover{border-color:#10B981;color:#10B981;background:#f0fdf4}
+.qty-num{width:40px;text-align:center;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;font-weight:500;padding:3px 0;background:#fafafa}
+.qty-num:focus{outline:none;border-color:var(--primary)}
+.detail-btn{margin-top:8px;width:100%;padding:6px;border:1px solid var(--border);border-radius:7px;background:#fafafa;font-family:inherit;font-size:12px;color:#555;cursor:pointer;text-align:center;transition:all 0.15s}
+.detail-btn:hover{background:#EFF6FF;color:var(--primary);border-color:#BFDBFE}
+
+/* ── MODAL BASE ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;opacity:0;pointer-events:none;transition:opacity 0.2s;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--white);border-radius:16px;width:100%;max-width:820px;max-height:92vh;display:flex;flex-direction:column;transform:scale(0.96);opacity:0;transition:transform 0.2s,opacity 0.2s;overflow:hidden}
+.modal-overlay.open .modal-box{transform:scale(1);opacity:1}
+.modal-box.fullscreen{max-width:100%;max-height:100%;border-radius:0}
+.modal-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.modal-title{flex:1;font-size:16px;font-weight:700}
+.modal-sub{font-size:12px;color:var(--muted)}
+.modal-header-btns{display:flex;gap:6px}
+.icon-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:#fafafa;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:#555;transition:all 0.15s;flex-shrink:0}
+.icon-btn:hover{background:#f0f0ee;border-color:#ccc}
+
+/* ── DETAIL MODAL ── */
+#detailModal .modal-body{display:flex;flex:1;overflow:hidden}
+.detail-img-col{width:260px;flex-shrink:0;padding:16px;display:flex;flex-direction:column;gap:12px;border-left:1px solid var(--border);overflow-y:auto}
+.detail-img-col img{width:100%;border-radius:10px;border:1px solid var(--border)}
+.detail-info{background:#F9F9F7;border-radius:8px;padding:10px 12px}
+.detail-info-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:12px}
+.detail-info-row:last-child{border:none}
+.detail-info-label{color:var(--muted)}
+.detail-info-val{font-weight:600}
+.detail-qty-ctrl{display:flex;align-items:center;gap:8px;margin-top:4px}
+.detail-table-col{flex:1;overflow-y:auto;padding:16px}
+.detail-table-col h3{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #EFF6FF}
+
+/* ── SUMMARY MODAL ── */
+#summaryModal .modal-box{max-width:900px}
+#summaryModal .modal-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:20px}
+.summary-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.summary-empty p{font-size:15px;margin-top:8px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.metric{background:#EFF6FF;border-radius:10px;padding:14px 16px;text-align:center}
+.metric-val{font-size:26px;font-weight:700;color:var(--primary)}
+.metric-label{font-size:11px;color:var(--muted);margin-top:2px}
+.selected-units{display:flex;flex-wrap:wrap;gap:8px}
+.su-chip{display:flex;align-items:center;gap:8px;background:#F9F9F7;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px}
+.su-chip img{width:36px;height:36px;object-fit:contain;border-radius:4px;background:#fff;border:1px solid #eee}
+.su-chip strong{font-weight:700;color:var(--primary)}
+.section-title{font-size:14px;font-weight:700;color:var(--primary);margin-bottom:8px}
+.summary-actions{display:flex;gap:10px;flex-wrap:wrap;padding-top:4px}
+.action-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;color:#444}
+.action-btn:hover{border-color:#bbb;background:#f4f4f2}
+.action-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.action-btn.primary:hover{background:var(--primary-dark)}
+
+/* ── CUT TABLE ── */
+.cut-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.cut-table th{text-align:right;padding:7px 10px;color:var(--muted);font-weight:600;font-size:11px;border-bottom:2px solid #eee;background:#fafafa;white-space:nowrap}
+.cut-table td{padding:6px 10px;border-bottom:1px solid #F4F4F2;vertical-align:middle}
+.cut-table tbody tr:hover{background:#FAFAFA}
+.sku-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#DBEAFE;color:#1D4ED8;white-space:nowrap}
+.sku-pill.hw{background:#DCFCE7;color:#15803D}
+.table-section-row td{background:#F4F4F2;font-size:11px;font-weight:700;color:#666;padding:5px 10px}
+.table-total-row td{font-weight:700;background:#EFF6FF;color:var(--primary);padding:7px 10px;border-top:2px solid #BFDBFE}
+
+/* ── TABS ── */
+.tab-nav{display:flex;gap:0;border-bottom:2px solid var(--border)}
+.tab-btn{padding:0 24px;height:44px;border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.15s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:700}
+.tab-page{display:none}.tab-page.active{display:block}
+
+/* ── PROFILES PAGE ── */
+.mgmt-page{padding:20px 24px 60px;max-width:1000px;margin:0 auto}
+.mgmt-section{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:24px;overflow:hidden}
+.mgmt-section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:#fafafa}
+.mgmt-section-title{font-size:15px;font-weight:700;color:var(--primary)}
+.mgmt-section-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.mgmt-table{width:100%;border-collapse:collapse}
+.mgmt-table th{text-align:right;padding:8px 14px;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);background:#fafafa}
+.mgmt-table td{padding:6px 10px;border-bottom:1px solid #f4f4f2;vertical-align:middle}
+.mgmt-table tbody tr:hover{background:#fafafe}
+.mgmt-input{width:100%;padding:5px 9px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;background:#fff;color:var(--text);transition:border-color 0.15s}
+.mgmt-input:focus{outline:none;border-color:var(--primary);background:#fff}
+.mgmt-input.changed{border-color:#F59E0B;background:#fffbeb}
+.sku-code{display:inline-block;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:700;background:#DBEAFE;color:#1D4ED8;white-space:nowrap}
+.sku-code.hw{background:#DCFCE7;color:#15803D}
+.type-badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.type-badge.profile{background:#EFF6FF;color:var(--primary)}
+.type-badge.hardware{background:#F0FDF4;color:#15803D}
+.mgmt-actions{display:flex;gap:10px;padding:14px 20px;background:#fafafa;border-top:1px solid var(--border)}
+.save-btn{padding:8px 20px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s}
+.save-btn:hover{background:var(--primary-dark)}
+.reset-btn{padding:8px 16px;background:transparent;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.reset-btn:hover{border-color:#EF4444;color:#EF4444}
+.save-notice{font-size:12px;color:#10B981;font-weight:500;display:none;align-items:center;gap:4px}
+.save-notice.show{display:flex}
+
+/* ── PROJECT HEADER ── */
+.proj-btn{padding:7px 13px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;color:#444;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.proj-btn:hover{border-color:#bbb;background:#f4f4f2}
+.proj-btn.active-proj{border-color:var(--primary);color:var(--primary);background:#EFF6FF}
+.proj-new-btn{padding:7px 13px;background:#10B981;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.proj-new-btn:hover{background:#059669}
+.proj-name-badge{max-width:130px;overflow:hidden;text-overflow:ellipsis}
+
+/* ── PROJECT DROPDOWN ── */
+.proj-dropdown-wrap{position:relative}
+.proj-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--white);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:260px;z-index:150;overflow:hidden;display:none}
+.proj-dropdown.open{display:block}
+.proj-dropdown-header{padding:10px 14px;font-size:11px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);background:#fafafa;letter-spacing:0.5px;text-transform:uppercase}
+.proj-dropdown-item{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f3;transition:background 0.1s}
+.proj-dropdown-item:hover{background:#f9f9f7}
+.proj-dropdown-item.active-item{background:#EFF6FF}
+.proj-item-info{flex:1;min-width:0}
+.proj-item-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-item-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.proj-item-check{color:var(--primary);font-size:14px;font-weight:700;width:16px;flex-shrink:0}
+.proj-item-btns{display:flex;gap:4px;flex-shrink:0}
+.proj-icon-btn{padding:3px 7px;border-radius:5px;border:1px solid var(--border);background:#fff;font-size:12px;cursor:pointer;color:#666;transition:all 0.1s}
+.proj-icon-btn:hover{background:#f0f0ee}
+.proj-icon-btn.del:hover{border-color:#EF4444;color:#EF4444;background:#fff5f5}
+.proj-dropdown-footer{padding:10px 14px;border-top:1px solid var(--border);background:#fafafa}
+.proj-add-btn{width:100%;padding:7px;border:1.5px dashed var(--border);border-radius:7px;background:transparent;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.proj-add-btn:hover{border-color:var(--primary);color:var(--primary);background:#EFF6FF}
+
+/* ── PROJECT MODAL ── */
+#projectModal .modal-box{max-width:480px}
+.proj-form{padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.proj-field{display:flex;flex-direction:column;gap:5px}
+.proj-field label{font-size:12px;font-weight:600;color:var(--muted)}
+.proj-field input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;color:var(--text);background:#fff;transition:border-color 0.15s}
+.proj-field input:focus{outline:none;border-color:var(--primary)}
+.proj-field input.required-empty{border-color:#EF4444;background:#fff5f5}
+.proj-field .field-hint{font-size:11px;color:#aaa;margin-top:2px}
+.front-toggle{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1.5px solid var(--border)}
+.front-toggle-btn{flex:1;padding:8px 0;border:none;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:#fafafa;color:#666;transition:all 0.15s}
+.front-toggle-btn.selected{background:var(--primary);color:#fff}
+.proj-form-actions{display:flex;gap:10px;padding-top:4px}
+.proj-submit-btn{flex:1;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.15s}
+.proj-submit-btn:hover{background:var(--primary-dark)}
+.proj-cancel-btn{padding:10px 16px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.proj-cancel-btn:hover{border-color:#ccc;color:#444}
+
+/* ── SUMMARY PROJECT HEADER ── */
+.sum-proj-header{background:#EFF6FF;border-radius:8px;padding:12px 16px;display:flex;gap:16px;flex-wrap:wrap}
+.sum-proj-field{display:flex;flex-direction:column;gap:2px}
+.sum-proj-label{font-size:10px;font-weight:700;color:#6B9DD4;text-transform:uppercase;letter-spacing:0.5px}
+.sum-proj-val{font-size:13px;font-weight:600;color:var(--primary)}
+
+/* ── FRONT HEIGHT BADGE ── */
+.fh-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:#FEF3C7;color:#D97706;font-size:10px;font-weight:700;border:1px solid #FDE68A}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .header{padding:0 14px}
+  .filterbar{padding:10px 14px}
+  .page{padding:14px 14px 80px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  #detailModal .modal-body{flex-direction:column}
+  .detail-img-col{width:100%;border-left:none;border-bottom:1px solid var(--border)}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .logo{font-size:18px}
+}
+@media print{
+  .header,.filterbar,.modal-overlay:not(#summaryModal),.summary-actions{display:none!important}
+  #summaryModal{position:static;opacity:1;pointer-events:all;padding:0}
+  #summaryModal .modal-box{max-height:none;box-shadow:none;border-radius:0;transform:none;opacity:1}
+  #summaryModal .modal-body{overflow:visible}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Alum<span>ex</span></div>
+  <div class="header-spacer"></div>
+  <!-- Project Dropdown -->
+  <div class="proj-dropdown-wrap" id="projDropWrap">
+    <button class="proj-btn" id="projDropBtn" onclick="toggleProjectDropdown()" title="פרויקטים">
+      <span>📁</span>
+      <span class="proj-name-badge" id="projNameBadge">ללא פרויקט</span>
+      <span>▾</span>
+    </button>
+    <div class="proj-dropdown" id="projDropdown">
+      <div class="proj-dropdown-header">פרויקטים שמורים</div>
+      <div id="projList"></div>
+      <div class="proj-dropdown-footer">
+        <button class="proj-add-btn" onclick="openNewProjectModal(); toggleProjectDropdown()">+ פרויקט חדש</button>
+      </div>
+    </div>
+  </div>
+  <button class="proj-new-btn" onclick="openNewProjectModal()">+ פרויקט חדש</button>
+  <button class="clear-btn" onclick="clearAll()">נקה הכל</button>
+  <button class="summary-btn" id="summaryBtn" onclick="openSummary()">
+    סיכום <span class="badge" id="summaryBadge">0</span>
+  </button>
+</header>
+
+<!-- PROJECT MODAL -->
+<div class="modal-overlay" id="projectModal" onclick="handleOverlayClick(event,'projectModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="projModalTitle">פרויקט חדש</div>
+      <div class="modal-header-btns">
+        <button class="icon-btn" onclick="closeModal('projectModal')">✕</button>
+      </div>
+    </div>
+    <div class="proj-form">
+      <div class="proj-field">
+        <label>שם לקוח *</label>
+        <input type="text" id="projFieldName" placeholder="ישראל ישראלי" autocomplete="off">
+      </div>
+      <div class="proj-field">
+        <label>מספר מגיק</label>
+        <input type="text" id="projFieldMagic" placeholder="12345">
+      </div>
+      <div class="proj-field">
+        <label>מספר הזמנה Salesforce</label>
+        <input type="text" id="projFieldSF" placeholder="SF-00001">
+      </div>
+      <div class="proj-field">
+        <label>סוג חזית</label>
+        <div class="front-toggle" id="frontTypeToggle">
+          <button class="front-toggle-btn selected" onclick="selectFrontType('הדבקה')">הדבקה</button>
+          <button class="front-toggle-btn" onclick="selectFrontType('מסגרת')">מסגרת</button>
+        </div>
+      </div>
+      <div class="proj-field">
+        <label>גובה חזית (מ"מ)</label>
+        <input type="number" id="projFieldFH" placeholder="750" min="400" max="1200">
+        <div class="field-hint">ברירת מחדל: 750 מ"מ. שינוי יעדכן את מידות FD01/FD03/FD04 בהתאם.</div>
+      </div>
+      <input type="hidden" id="projEditId" value="">
+      <div class="proj-form-actions">
+        <button class="proj-cancel-btn" onclick="closeModal('projectModal')">ביטול</button>
+        <button class="proj-submit-btn" onclick="submitProjectForm()">צור פרויקט</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB NAV -->
+<div class="filterbar" style="padding-bottom:0;gap:0;flex-wrap:nowrap">
+  <div class="tab-nav" style="flex:1">
+    <button class="tab-btn active" id="tab-catalog" onclick="switchTab('catalog')">קטלוג יחידות</button>
+    <button class="tab-btn" id="tab-profiles" onclick="switchTab('profiles')">ניהול פרופילים ויחידות</button>
+  </div>
+</div>
+
+<!-- TAB: CATALOG -->
+<div class="tab-page active" id="page-catalog">
+  <!-- FILTER BAR -->
+  <div class="filterbar" style="position:sticky;top:60px">
+    <div class="cats" id="catBtns"></div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" placeholder="חיפוש יחידה..." oninput="renderGrid()">
+    </div>
+  </div>
+  <main class="page">
+    <div class="grid" id="grid"></div>
+  </main>
+</div>
+
+<!-- TAB: PROFILES MANAGEMENT -->
+<div class="tab-page" id="page-profiles">
+  <div class="mgmt-page">
+
+    <!-- PROFILES TABLE -->
+    <div class="mgmt-section">
+      <div class="mgmt-section-header">
+        <div>
+          <div class="mgmt-section-title">מק"טי פרופילים</div>
+          <div class="mgmt-section-sub">ערוך שמות ותיאורים — השינויים נשמרים אוטומטית ומשפיעים על כל טבלאות החיתוך</div>
+        </div>
+      </div>
+      <table class="mgmt-table">
+        <thead><tr>
+          <th style="width:100px">מק"ט</th>
+          <th>שם / תיאור</th>
+          <th style="width:110px">סוג</th>
+        </tr></thead>
+        <tbody id="profilesTableBody"></tbody>
+      </table>
+      <div class="mgmt-actions">
+        <button class="save-btn" onclick="saveProfiles()">שמור שינויים</button>
+        <button class="reset-btn" onclick="resetProfiles()">איפוס לברירת מחדל</button>
+        <span class="save-notice" id="profilesSaveNotice">✓ נשמר בהצלחה</span>
+      </div>
+    </div>
+
+    <!-- UNITS TABLE -->
+    <div class="mgmt-section">
+      <div class="mgmt-section-header">
+        <div>
+          <div class="mgmt-section-title">שמות יחידות</div>
+          <div class="mgmt-section-sub">ערוך שמות ומק"טים של יחידות הארון</div>
+        </div>
+      </div>
+      <table class="mgmt-table">
+        <thead><tr>
+          <th style="width:100px">תמונה</th>
+          <th style="width:160px">מק"ט יחידה</th>
+          <th>שם יחידה</th>
+          <th style="width:90px">קטגוריה</th>
+          <th style="width:130px">מידות (מ"מ)</th>
+        </tr></thead>
+        <tbody id="unitsTableBody"></tbody>
+      </table>
+      <div class="mgmt-actions">
+        <button class="save-btn" onclick="saveUnits()">שמור שינויים</button>
+        <button class="reset-btn" onclick="resetUnits()">איפוס לברירת מחדל</button>
+        <span class="save-notice" id="unitsSaveNotice">✓ נשמר בהצלחה</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="handleOverlayClick(event,'detailModal')">
+  <div class="modal-box" id="detailBox">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detailTitle"></div>
+        <div class="modal-sub" id="detailSub"></div>
+      </div>
+      <div class="modal-header-btns">
+        <button class="icon-btn" id="detailFsBtn" onclick="toggleFS('detailBox','detailFsBtn')" title="מסך מלא">⛶</button>
+        <button class="icon-btn" onclick="closeModal('detailModal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="detail-img-col">
+        <img id="detailImg" src="" alt="">
+        <div class="detail-info" id="detailInfo"></div>
+      </div>
+      <div class="detail-table-col" id="detailTable"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY MODAL -->
+<div class="modal-overlay" id="summaryModal" onclick="handleOverlayClick(event,'summaryModal')">
+  <div class="modal-box" id="summaryBox">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">סיכום רשימת חיתוך</div>
+        <div class="modal-sub" id="summaryProjSub"></div>
+      </div>
+      <div class="modal-header-btns">
+        <button class="icon-btn" id="sumFsBtn" onclick="toggleFS('summaryBox','sumFsBtn')" title="מסך מלא">⛶</button>
+        <button class="icon-btn" onclick="closeModal('summaryModal')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="summaryBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const PROFILE_DESC = {
+  "FD01":"פרופיל הגלשה","FD03":"פרופיל הדבקה","FD04":"הדבקה + וידית",
+  "B01":"גוף קדמי","B02":"גוף אמצעי","B03":"גוף אחורי",
+  "D01":"מגירה קדמי","D02":"מגירה אמצעי","D03":"מגירה אחורי",
+  "E07":"זווית 30°","E02":"מסתור כיור","E08":"נשא מדף",
+  "808BR":"מגירה גרפיט 185מ\"מ","808BR18":"מגירה גרפיט 121מ\"מ",
+  "CH.3138":"ציר דלת 105מ\"מ","BR40":"זווית 40×8מ\"מ"
+};
+
+const UNITS = [
+  {"id":"STOR25_1F_1M","name":"ארון אחסון תחתון 1עגלה 1צרה","code":"STOR25_1F_1M","cat":"אחסון","dims":"600×750×592","imgIdx":0,
+   "panels":[{"barcode":"1034","label":"חזית מגירה","len":223,"width":596,"qty":1},{"barcode":"1020","label":"חזית מגירה","len":473,"width":596,"qty":1},{"barcode":"1017","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1033","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":1},{"barcode":"1019","label":"לוקובונד לגב חזית","len":460,"width":593,"qty":1}],
+   "profiles":[{"sku":"E07","len":750,"qty":1},{"sku":"FD01","len":750,"qty":8},{"sku":"FD01","len":627,"qty":2},{"sku":"FD01","len":606,"qty":4},{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":1},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"D02","len":561,"qty":2},{"sku":"D01","len":561,"qty":4},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":2},{"sku":"FD03","len":463.4,"qty":2},{"sku":"FD03","len":213.4,"qty":2}]},
+  {"id":"STOR25_1F_1NM_1M","name":"ארון אחסון תחתון 1עגלה פנימית 1צרה","code":"STOR25_1F_1NM_1M","cat":"אחסון","dims":"600×750×592","imgIdx":1,
+   "panels":[{"barcode":"1085","label":"חזית מגירה","len":223,"width":596,"qty":1},{"barcode":"1071","label":"חזית מגירה","len":473,"width":596,"qty":1},{"barcode":"1061","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1084","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":1},{"barcode":"1070","label":"לוקובונד לגב חזית","len":460,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":463.4,"qty":2},{"sku":"FD03","len":492,"qty":1},{"sku":"FD03","len":213.4,"qty":2}]},
+  {"id":"STOR25_3M","name":"ארון אחסון תחתון 3 מגירות 25","code":"STOR25_3M","cat":"אחסון","dims":"600×750×592","imgIdx":2,
+   "panels":[{"barcode":"1115","label":"חזית מגירה","len":223,"width":596,"qty":3},{"barcode":"1112","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1114","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":1},{"barcode":"1140","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":2}],
+   "profiles":[{"sku":"808BR18","len":0,"qty":3},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":3},{"sku":"FD04","len":596,"qty":3},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":213.4,"qty":6}]},
+  {"id":"STOR27_1F_1M","name":"ארון אחסון תחתון 1עגלה 1צרה 27","code":"STOR27_1F_1M","cat":"אחסון","dims":"600×750×592","imgIdx":3,
+   "panels":[{"barcode":"1185","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1171","label":"חזית מגירה","len":513,"width":596,"qty":1},{"barcode":"1168","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1184","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1170","label":"לוקובונד לגב חזית","len":500,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":1},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"D02","len":561,"qty":2},{"sku":"D01","len":561,"qty":4},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":2},{"sku":"FD03","len":503.4,"qty":2},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOR27_1F_1NM_1M","name":"ארון אחסון תחתון 1עגלה פנימית 1צרה 27","code":"STOR27_1F_1NM_1M","cat":"אחסון","dims":"600×750×592","imgIdx":4,
+   "panels":[{"barcode":"1236","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1222","label":"חזית מגירה","len":513,"width":596,"qty":1},{"barcode":"1212","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1235","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1221","label":"לוקובונד לגב חזית","len":500,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":503.4,"qty":2},{"sku":"FD03","len":492,"qty":1},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOR27_3M","name":"ארון אחסון תחתון 3 מגירות 27","code":"STOR27_3M","cat":"אחסון","dims":"600×750×592","imgIdx":5,
+   "panels":[{"barcode":"1292","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1266","label":"חזית מגירה","len":243,"width":596,"qty":2},{"barcode":"1263","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1291","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1278","label":"לוקובונד לגב חזית","len":230,"width":593,"qty":1},{"barcode":"1265","label":"לוקובונד לגב חזית","len":230,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR18","len":0,"qty":3},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":3},{"sku":"FD04","len":596,"qty":3},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":233.4,"qty":4},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOR_1LD","name":"ארון אחסון תחתון דלת שמאל","code":"STOR_1LD","cat":"אחסון","dims":"600×750×592","imgIdx":6,
+   "panels":[{"barcode":"1327","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1332","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1326","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"B02","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"E08","len":577.3,"qty":2},{"sku":"B03","len":575,"qty":1},{"sku":"B01","len":575,"qty":1},{"sku":"B02","len":575,"qty":1},{"sku":"CH.3138","len":0,"qty":5}]},
+  {"id":"STOR_1RD","name":"ארון אחסון תחתון דלת ימין","code":"STOR_1RD","cat":"אחסון","dims":"600×750×592","imgIdx":7,
+   "panels":[{"barcode":"1357","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1362","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1356","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"B02","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"E08","len":577.3,"qty":2},{"sku":"B03","len":575,"qty":1},{"sku":"B01","len":575,"qty":1},{"sku":"B02","len":575,"qty":1},{"sku":"CH.3138","len":0,"qty":5}]},
+  {"id":"STOR_2D","name":"ארון אחסון תחתון 2 דלתות","code":"STOR_2D","cat":"אחסון","dims":"600×750×592","imgIdx":8,
+   "panels":[{"barcode":"1399","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1388","label":"חזית דלת","len":723,"width":296,"qty":1},{"barcode":"1394","label":"חזית דלת","len":723,"width":296,"qty":1},{"barcode":"1387","label":"לוקובונד לגב דלת","len":710,"width":293,"qty":1},{"barcode":"1393","label":"לוקובונד לגב דלת","len":710,"width":293,"qty":1}],
+   "profiles":[{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":4},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"E08","len":577.3,"qty":2},{"sku":"B03","len":575,"qty":1},{"sku":"B02","len":575,"qty":1},{"sku":"B01","len":575,"qty":1},{"sku":"FD04","len":296,"qty":2},{"sku":"FD03","len":296,"qty":2},{"sku":"CH.3138","len":0,"qty":6}]},
+  {"id":"GRILL_1F","name":"ארון תחתון גריל 1עגלה","code":"GRILL_1F","cat":"גריל","dims":"590×750×592","imgIdx":9,
+   "panels":[{"barcode":"1422","label":"חזית מגירה","len":440,"width":586,"qty":1},{"barcode":"1419","label":"גב","len":462,"width":585,"qty":1},{"barcode":"1421","label":"לוקובונד לגב חזית","len":427,"width":583,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":586,"qty":1},{"sku":"FD04","len":586,"qty":1},{"sku":"E07","len":572,"qty":1},{"sku":"BR40","len":572,"qty":1},{"sku":"B03","len":572,"qty":2},{"sku":"B01","len":572,"qty":2},{"sku":"B02","len":572,"qty":2},{"sku":"D02","len":551,"qty":1},{"sku":"D01","len":551,"qty":2},{"sku":"D03","len":530,"qty":1},{"sku":"D02","len":530,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"FD03","len":430.4,"qty":2}]},
+  {"id":"GRILL_1F_1NM","name":"ארון תחתון גריל 1עגלה פנימית","code":"GRILL_1F_1NM","cat":"גריל","dims":"590×750×592","imgIdx":10,
+   "panels":[{"barcode":"1458","label":"חזית מגירה","len":440,"width":586,"qty":1},{"barcode":"1455","label":"גב","len":462,"width":585,"qty":1},{"barcode":"1457","label":"לוקובונד לגב חזית","len":427,"width":583,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":586,"qty":1},{"sku":"FD04","len":586,"qty":1},{"sku":"E07","len":572,"qty":1},{"sku":"BR40","len":572,"qty":1},{"sku":"B03","len":572,"qty":2},{"sku":"B01","len":572,"qty":2},{"sku":"B02","len":572,"qty":2},{"sku":"D02","len":551,"qty":1},{"sku":"D01","len":551,"qty":2},{"sku":"D03","len":530,"qty":1},{"sku":"D02","len":530,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"FD03","len":430.4,"qty":2}]},
+  {"id":"GRILL_2D","name":"ארון תחתון גריל 2דלתות","code":"GRILL_2D","cat":"גריל","dims":"590×750×592","imgIdx":11,
+   "panels":[{"barcode":"1491","label":"גב","len":462,"width":585,"qty":1},{"barcode":"1501","label":"חזית דלת","len":440,"width":291,"qty":1},{"barcode":"1495","label":"חזית דלת","len":440,"width":291,"qty":1},{"barcode":"1494","label":"לוקובונד לגב דלת","len":427,"width":288,"qty":1},{"barcode":"1500","label":"לוקובונד לגב דלת","len":427,"width":288,"qty":1}],
+   "profiles":[{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"BR40","len":572,"qty":1},{"sku":"E07","len":572,"qty":1},{"sku":"B03","len":572,"qty":2},{"sku":"B01","len":572,"qty":2},{"sku":"B02","len":572,"qty":2},{"sku":"FD03","len":430.4,"qty":4},{"sku":"FD04","len":291,"qty":2},{"sku":"FD03","len":291,"qty":2},{"sku":"CH.3138","len":0,"qty":6}]},
+  {"id":"GRILL_2M","name":"ארון תחתון גריל 2צרות","code":"GRILL_2M","cat":"גריל","dims":"590×750×592","imgIdx":12,
+   "panels":[{"barcode":"1530","label":"חזית מגירה","len":206.5,"width":586,"qty":2},{"barcode":"1527","label":"גב","len":462,"width":585,"qty":1},{"barcode":"1529","label":"לוקובונד לגב חזית","len":193.5,"width":583,"qty":1},{"barcode":"1542","label":"לוקובונד לגב חזית","len":193.5,"width":583,"qty":1}],
+   "profiles":[{"sku":"808BR18","len":0,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":586,"qty":2},{"sku":"FD04","len":586,"qty":2},{"sku":"E07","len":572,"qty":1},{"sku":"BR40","len":572,"qty":1},{"sku":"B03","len":572,"qty":2},{"sku":"B01","len":572,"qty":2},{"sku":"B02","len":572,"qty":2},{"sku":"D02","len":551,"qty":2},{"sku":"D01","len":551,"qty":4},{"sku":"D03","len":530,"qty":2},{"sku":"FD03","len":196.9,"qty":4}]},
+  {"id":"SINK_1LD","name":"ארון תחתון כיור דלת שמאל","code":"SINK_1LD","cat":"כיור","dims":"600×750×592","imgIdx":13,
+   "panels":[{"barcode":"1576","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1581","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1575","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"E07","len":582,"qty":1},{"sku":"E02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2},{"sku":"CH.3138","len":0,"qty":5}]},
+  {"id":"SINK_1RD","name":"ארון תחתון כיור דלת ימין","code":"SINK_1RD","cat":"כיור","dims":"600×750×592","imgIdx":14,
+   "panels":[{"barcode":"1603","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1608","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1602","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"E07","len":582,"qty":1},{"sku":"E02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2},{"sku":"CH.3138","len":0,"qty":5}]},
+  {"id":"SINK_2D","name":"ארון תחתון כיור זוג דלתות","code":"SINK_2D","cat":"כיור","dims":"900×750×592","imgIdx":15,
+   "panels":[{"barcode":"1642","label":"גב","len":745,"width":895,"qty":1},{"barcode":"1631","label":"חזית דלת","len":723,"width":446,"qty":1},{"barcode":"1637","label":"חזית דלת","len":723,"width":446,"qty":1},{"barcode":"1630","label":"לוקובונד לגב דלת","len":710,"width":443,"qty":1},{"barcode":"1636","label":"לוקובונד לגב דלת","len":710,"width":443,"qty":1}],
+   "profiles":[{"sku":"B03","len":882,"qty":1},{"sku":"B02","len":882,"qty":1},{"sku":"E07","len":882,"qty":1},{"sku":"B01","len":882,"qty":1},{"sku":"E02","len":882,"qty":1},{"sku":"BR40","len":882,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":4},{"sku":"FD04","len":446,"qty":2},{"sku":"FD03","len":446,"qty":2},{"sku":"CH.3138","len":0,"qty":8}]},
+  {"id":"SINK_STOVE_2D","name":"ארון תחתון כיור כיריים זוג דלתות","code":"SINK_STOVE_2D","cat":"כיור","dims":"1200×750×592","imgIdx":16,
+   "panels":[{"barcode":"1677","label":"גב","len":745,"width":1195,"qty":1},{"barcode":"1666","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1672","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1671","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1},{"barcode":"1665","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B03","len":1182,"qty":1},{"sku":"B01","len":1182,"qty":1},{"sku":"B02","len":1182,"qty":1},{"sku":"E07","len":1182,"qty":1},{"sku":"E02","len":1182,"qty":1},{"sku":"BR40","len":1182,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":4},{"sku":"FD04","len":596,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"CH.3138","len":0,"qty":10}]},
+  {"id":"STOVE25_1F_1M","name":"ארון תחתון כיריים עגלה 1צרה 25","code":"STOVE25_1F_1M","cat":"כיריים","dims":"810×750×592","imgIdx":17,
+   "panels":[{"barcode":"1716","label":"חזית מגירה","len":223,"width":806,"qty":1},{"barcode":"1702","label":"חזית מגירה","len":473,"width":806,"qty":1},{"barcode":"1698","label":"גב","len":745,"width":805,"qty":1},{"barcode":"1715","label":"לוקובונד לגב חזית","len":210,"width":803,"qty":1},{"barcode":"1701","label":"לוקובונד לגב חזית","len":460,"width":803,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":1},{"sku":"FD03","len":806,"qty":2},{"sku":"FD04","len":806,"qty":2},{"sku":"B03","len":792,"qty":1},{"sku":"B01","len":792,"qty":1},{"sku":"B02","len":792,"qty":1},{"sku":"BR40","len":792,"qty":2},{"sku":"E07","len":792,"qty":2},{"sku":"D02","len":771,"qty":2},{"sku":"D01","len":771,"qty":4},{"sku":"D02","len":750,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":463.4,"qty":2},{"sku":"FD03","len":213.4,"qty":2}]},
+  {"id":"STOVE25_1F_1NM_1BF","name":"ארון תחתון כיריים עגלה פנימית 1קלפה 25","code":"STOVE25_1F_1NM_1BF","cat":"כיריים","dims":"600×750×592","imgIdx":18,
+   "panels":[{"barcode":"1776","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1762","label":"חזית מגירה","len":513,"width":596,"qty":1},{"barcode":"1745","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1775","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1761","label":"לוקובונד לגב חזית","len":500,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"E07","len":582,"qty":2},{"sku":"BR40","len":582,"qty":3},{"sku":"D02","len":561,"qty":2},{"sku":"D01","len":561,"qty":4},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":2},{"sku":"FD03","len":503.4,"qty":2},{"sku":"FD03","len":492,"qty":1},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOVE25_1F_1NM_1M","name":"ארון תחתון כיריים עגלה פנימית 1צרה 25","code":"STOVE25_1F_1NM_1M","cat":"כיריים","dims":"600×750×592","imgIdx":18,
+   "panels":[{"barcode":"1824","label":"חזית מגירה","len":223,"width":596,"qty":1},{"barcode":"1810","label":"חזית מגירה","len":473,"width":596,"qty":1},{"barcode":"1799","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1823","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":1},{"barcode":"1809","label":"לוקובונד לגב חזית","len":460,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"E07","len":582,"qty":2},{"sku":"BR40","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":463.4,"qty":2},{"sku":"FD03","len":492,"qty":1},{"sku":"FD03","len":213.4,"qty":2}]},
+  {"id":"STOVE25_3M","name":"ארון תחתון כיריים 3 מגירות 25","code":"STOVE25_3M","cat":"כיריים","dims":"600×750×592","imgIdx":19,
+   "panels":[{"barcode":"1916","label":"חזית מגירה","len":223,"width":596,"qty":3},{"barcode":"1912","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1915","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":1},{"barcode":"1941","label":"לוקובונד לגב חזית","len":210,"width":593,"qty":2}],
+   "profiles":[{"sku":"808BR18","len":0,"qty":3},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":596,"qty":3},{"sku":"FD04","len":596,"qty":3},{"sku":"B01","len":582,"qty":1},{"sku":"B03","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2},{"sku":"E07","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":213.4,"qty":6}]},
+  {"id":"STOVE25_2M_1BF","name":"ארון תחתון כיריים 2 צרות 25 קלפה","code":"STOVE25_2M_1BF","cat":"כיריים","dims":"600×750×592","imgIdx":20,
+   "panels":[{"barcode":"1889","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1876","label":"חזית מגירה","len":243,"width":596,"qty":2},{"barcode":"1853","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1888","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1862","label":"לוקובונד לגב חזית","len":230,"width":593,"qty":1},{"barcode":"1875","label":"לוקובונד לגב חזית","len":230,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR18","len":0,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":3},{"sku":"FD04","len":596,"qty":3},{"sku":"B03","len":582,"qty":2},{"sku":"B01","len":582,"qty":2},{"sku":"B02","len":582,"qty":2},{"sku":"E07","len":582,"qty":2},{"sku":"BR40","len":582,"qty":3},{"sku":"D02","len":561,"qty":2},{"sku":"D01","len":561,"qty":4},{"sku":"D03","len":540,"qty":2},{"sku":"FD03","len":233.4,"qty":4},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOVE27_1F_1NM_1M","name":"ארון תחתון כיריים עגלה פנימית 1צרה 27","code":"STOVE27_1F_1NM_1M","cat":"כיריים","dims":"600×750×592","imgIdx":21,
+   "panels":[{"barcode":"1996","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1982","label":"חזית מגירה","len":513,"width":596,"qty":1},{"barcode":"1971","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1995","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1981","label":"לוקובונד לגב חזית","len":500,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"808BR18","len":0,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":596,"qty":2},{"sku":"FD04","len":596,"qty":2},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2},{"sku":"E07","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D02","len":540,"qty":1,"label":"חתוך 170מ\"מ"},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":503.4,"qty":2},{"sku":"FD03","len":492,"qty":1},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOVE27_3M","name":"ארון תחתון כיריים 3 מגירות 27","code":"STOVE27_3M","cat":"כיריים","dims":"600×750×592","imgIdx":22,
+   "panels":[{"barcode":"1055","label":"חזית מגירה","len":183,"width":596,"qty":1},{"barcode":"1042","label":"חזית מגירה","len":243,"width":596,"qty":2},{"barcode":"1025","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1054","label":"לוקובונד לגב חזית","len":170,"width":593,"qty":1},{"barcode":"1041","label":"לוקובונד לגב חזית","len":230,"width":593,"qty":1},{"barcode":"1028","label":"לוקובונד לגב חזית","len":230,"width":593,"qty":1}],
+   "profiles":[{"sku":"808BR18","len":0,"qty":3},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":596,"qty":3},{"sku":"FD04","len":596,"qty":3},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2},{"sku":"E07","len":582,"qty":2},{"sku":"D02","len":561,"qty":3},{"sku":"D01","len":561,"qty":6},{"sku":"D03","len":540,"qty":3},{"sku":"FD03","len":233.4,"qty":4},{"sku":"FD03","len":173.4,"qty":2}]},
+  {"id":"STOVE_1LD","name":"ארון תחתון כיריים דלת שמאל","code":"STOVE_1LD","cat":"כיריים","dims":"600×750×592","imgIdx":23,
+   "panels":[{"barcode":"1086","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1091","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1085","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"E07","len":582,"qty":1},{"sku":"E02","len":582,"qty":1},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2}]},
+  {"id":"STOVE_1RD","name":"ארון תחתון כיריים דלת ימין","code":"STOVE_1RD","cat":"כיריים","dims":"600×750×592","imgIdx":24,
+   "panels":[{"barcode":"1113","label":"חזית דלת","len":723,"width":596,"qty":1},{"barcode":"1118","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1112","label":"לוקובונד לגב דלת","len":710,"width":593,"qty":1}],
+   "profiles":[{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"B03","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"E07","len":582,"qty":1},{"sku":"E02","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2}]},
+  {"id":"STOVE_2D","name":"ארון תחתון כיריים זוג דלתות","code":"STOVE_2D","cat":"כיריים","dims":"600×750×592","imgIdx":25,
+   "panels":[{"barcode":"1152","label":"גב","len":745,"width":595,"qty":1},{"barcode":"1141","label":"חזית דלת","len":723,"width":296,"qty":1},{"barcode":"1147","label":"חזית דלת","len":723,"width":296,"qty":1},{"barcode":"1140","label":"לוקובונד לגב דלת","len":710,"width":293,"qty":1},{"barcode":"1146","label":"לוקובונד לגב דלת","len":710,"width":293,"qty":1}],
+   "profiles":[{"sku":"B03","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"FD03","len":713.4,"qty":4},{"sku":"E02","len":582,"qty":1},{"sku":"B01","len":582,"qty":1},{"sku":"B02","len":582,"qty":1},{"sku":"E07","len":582,"qty":1},{"sku":"B03","len":582,"qty":1},{"sku":"BR40","len":582,"qty":2},{"sku":"FD03","len":296,"qty":2},{"sku":"FD04","len":296,"qty":2}]},
+  {"id":"CORNER100","name":"ארון תחתון פינה מתה 100","code":"CORNER100","cat":"פינה","dims":"715×750×715","imgIdx":26,
+   "panels":[{"barcode":"1198","label":"חזית דלת","len":723,"width":102,"qty":2}],
+   "profiles":[{"sku":"E07","len":750,"qty":1},{"sku":"FD01","len":750,"qty":8},{"sku":"FD01","len":715,"qty":2},{"sku":"FD03","len":713.4,"qty":4},{"sku":"FD01","len":694,"qty":4},{"sku":"FD04","len":102,"qty":2},{"sku":"FD03","len":102,"qty":2}]},
+  {"id":"CORNER140","name":"ארון תחתון פינה מתה 140","code":"CORNER140","cat":"פינה","dims":"753×750×753","imgIdx":27,
+   "panels":[{"barcode":"1233","label":"חזית דלת","len":723,"width":140,"qty":2},{"barcode":"1239","label":"לוקובונד לגב דלת","len":710,"width":137,"qty":2}],
+   "profiles":[{"sku":"FD01","len":753,"qty":2},{"sku":"E07","len":750,"qty":1},{"sku":"FD01","len":750,"qty":8},{"sku":"FD01","len":732,"qty":4},{"sku":"FD03","len":713.4,"qty":4},{"sku":"FD03","len":140,"qty":2},{"sku":"FD04","len":140,"qty":2}]},
+  {"id":"PLANCHA_1F","name":"ארון תחתון פלנצה 1עגלה","code":"PLANCHA_1F","cat":"פלנצה","dims":"400×750×592","imgIdx":28,
+   "panels":[{"barcode":"1268","label":"חזית מגירה","len":454,"width":396,"qty":1},{"barcode":"1265","label":"גב","len":476,"width":395,"qty":1},{"barcode":"1267","label":"לוקובונד לגב חזית","len":441,"width":393,"qty":1}],
+   "profiles":[{"sku":"808BR","len":0,"qty":1},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"B03","len":750,"qty":2},{"sku":"FD03","len":444.4,"qty":2},{"sku":"FD03","len":396,"qty":1},{"sku":"FD04","len":396,"qty":1},{"sku":"B01","len":382,"qty":3},{"sku":"B03","len":382,"qty":3},{"sku":"B02","len":382,"qty":3},{"sku":"D02","len":361,"qty":1},{"sku":"D01","len":361,"qty":2},{"sku":"D03","len":340,"qty":1},{"sku":"D02","len":340,"qty":1,"label":"חתוך 170מ\"מ"}]},
+  {"id":"OVEN_1M","name":"ארון תחתון תנור מגירה","code":"OVEN_1M","cat":"תנור","dims":"600×750×592","imgIdx":29,
+   "panels":[{"barcode":"1303","label":"חזית מגירה","len":118,"width":596,"qty":1},{"barcode":"1300","label":"גב","len":140,"width":595,"qty":1},{"barcode":"1302","label":"לוקובונד לגב חזית","len":105,"width":593,"qty":1}],
+   "profiles":[{"sku":"B03","len":750,"qty":2},{"sku":"B01","len":750,"qty":2},{"sku":"B02","len":750,"qty":2},{"sku":"FD03","len":596,"qty":1},{"sku":"FD04","len":596,"qty":1},{"sku":"B02","len":582,"qty":3},{"sku":"B01","len":582,"qty":3},{"sku":"B03","len":582,"qty":3},{"sku":"FD03","len":108.4,"qty":2}]}
+];
+
+const CATS = ["הכל", ...new Set(UNITS.map(u => u.cat))];
+
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let selections = {}; // {id: qty}
+let activeCat = "הכל";
+let detailFS = false;
+let summaryFS = false;
+let projects = [];          // [{id, name, magic, salesforce, frontType, frontHeight, selections, createdAt}]
+let activeProjectId = null; // id of active project
+let selectedFrontType = 'הדבקה'; // temp state for project modal
+
+// ═══════════════════════════════════════════════
+//  RUNTIME OVERRIDES (editable names)
+// ═══════════════════════════════════════════════
+// Deep copies that can be mutated at runtime
+let profileDesc = { ...PROFILE_DESC };
+let unitsData = UNITS.map(u => ({ ...u }));
+
+// ═══════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════
+function saveStorage() {
+  try { localStorage.setItem('alumex_sel', JSON.stringify(selections)); } catch(e){}
+  saveCurrentProject();
+}
+function loadStorage() {
+  try {
+    const s = localStorage.getItem('alumex_sel');
+    if (s) selections = JSON.parse(s);
+  } catch(e){}
+}
+function saveProjects() {
+  try {
+    localStorage.setItem('alumex_projects', JSON.stringify(projects));
+    localStorage.setItem('alumex_active_project', activeProjectId || '');
+  } catch(e){}
+}
+function loadProjects() {
+  try {
+    const s = localStorage.getItem('alumex_projects');
+    if (s) projects = JSON.parse(s);
+    const ap = localStorage.getItem('alumex_active_project');
+    if (ap && projects.find(p => p.id === ap)) {
+      activeProjectId = ap;
+      const proj = projects.find(p => p.id === ap);
+      if (proj) selections = { ...proj.selections };
+    }
+  } catch(e){}
+}
+function saveProfileOverrides() {
+  try { localStorage.setItem('alumex_profiles', JSON.stringify(profileDesc)); } catch(e){}
+}
+function loadProfileOverrides() {
+  try {
+    const s = localStorage.getItem('alumex_profiles');
+    if (s) profileDesc = { ...PROFILE_DESC, ...JSON.parse(s) };
+  } catch(e){}
+}
+function saveUnitOverrides() {
+  try {
+    const overrides = {};
+    unitsData.forEach(u => { overrides[u.id] = { name: u.name, code: u.code }; });
+    localStorage.setItem('alumex_units', JSON.stringify(overrides));
+  } catch(e){}
+}
+function loadUnitOverrides() {
+  try {
+    const s = localStorage.getItem('alumex_units');
+    if (s) {
+      const overrides = JSON.parse(s);
+      unitsData = UNITS.map(u => overrides[u.id] ? { ...u, ...overrides[u.id] } : { ...u });
+    }
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+function init() {
+  loadProfileOverrides();
+  loadUnitOverrides();
+  loadProjects();
+  if (!activeProjectId) loadStorage(); // fallback for legacy data
+  renderCats();
+  renderGrid();
+  renderProjectHeader();
+  document.addEventListener('click', e => {
+    // Close dropdown on outside click
+    const wrap = document.getElementById('projDropWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('projDropdown').classList.remove('open');
+    }
+  });
+}
+
+function renderCats() {
+  const cats = ["הכל", ...new Set(unitsData.map(u => u.cat))];
+  const container = document.getElementById('catBtns');
+  container.innerHTML = cats.map(cat =>
+    `<button class="cat-btn${cat===activeCat?' active':''}" data-cat="${cat}" onclick="setCat('${cat}')">${cat}</button>`
+  ).join('');
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  renderGrid();
+}
+
+// ═══════════════════════════════════════════════
+//  GRID
+// ═══════════════════════════════════════════════
+function renderGrid() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const filtered = unitsData.filter(u =>
+    (activeCat === 'הכל' || u.cat === activeCat) &&
+    (!q || u.name.includes(q) || u.code.toLowerCase().includes(q))
+  );
+
+  const grid = document.getElementById('grid');
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="no-results">לא נמצאו יחידות תואמות</div>';
+    updateHeader();
+    return;
+  }
+
+  grid.innerHTML = filtered.map(u => {
+    const qty = selections[u.id] || 0;
+    return `
+    <div class="card${qty > 0 ? ' selected' : ''}" id="card_${u.id}">
+      <div class="card-check">✓</div>
+      <div class="card-img-wrap" onclick="openDetail('${u.id}')">
+        <img class="card-img" src="imgs/unit_${String(u.imgIdx).padStart(2,'0')}.jpg" loading="lazy" alt="${u.name}">
+        <span class="cat-tag" data-cat="${u.cat}">${u.cat}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name" onclick="openDetail('${u.id}')">${u.name}</div>
+        <div class="card-code">${u.code}</div>
+        <div class="card-dims">${u.dims} מ"מ</div>
+        <div class="qty-row">
+          <span class="qty-label">כמות:</span>
+          <div class="qty-ctrl">
+            <button class="qty-btn minus" onclick="changeQty('${u.id}',-1)">−</button>
+            <input class="qty-num" type="number" min="0" max="99" value="${qty}" id="qtynum_${u.id}"
+              onchange="setQtyFromInput('${u.id}',this.value)" onclick="this.select()">
+            <button class="qty-btn plus" onclick="changeQty('${u.id}',1)">+</button>
+          </div>
+        </div>
+        <button class="detail-btn" onclick="openDetail('${u.id}')">פירוט חיתוך ▸</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateHeader();
+}
+
+function changeQty(id, delta) {
+  const current = selections[id] || 0;
+  const next = Math.max(0, current + delta);
+  selections[id] = next;
+  saveStorage();
+  // Update input without full re-render
+  const inp = document.getElementById('qtynum_' + id);
+  if (inp) inp.value = next;
+  const card = document.getElementById('card_' + id);
+  if (card) card.classList.toggle('selected', next > 0);
+  updateHeader();
+}
+
+function setQtyFromInput(id, val) {
+  const n = Math.max(0, Math.min(99, parseInt(val) || 0));
+  selections[id] = n;
+  const inp = document.getElementById('qtynum_' + id);
+  if (inp) inp.value = n;
+  const card = document.getElementById('card_' + id);
+  if (card) card.classList.toggle('selected', n > 0);
+  saveStorage();
+  updateHeader();
+}
+
+function updateHeader() {
+  const total = Object.values(selections).reduce((s, v) => s + v, 0);
+  document.getElementById('summaryBadge').textContent = total;
+}
+
+function clearAll() {
+  if (!Object.values(selections).some(v => v > 0)) return;
+  if (!confirm('לנקות את כל הבחירות?')) return;
+  selections = {};
+  saveStorage();
+  renderGrid();
+}
+
+// ═══════════════════════════════════════════════
+//  FRONT HEIGHT SCALING
+// ═══════════════════════════════════════════════
+const FRONT_HEIGHT_BASE = 750; // mm — default front height all standard units
+
+function isFrontHeightProfile(sku, len, unitWidthMM) {
+  // Only FD profiles can be front-height dependent
+  if (!['FD01','FD03','FD04'].includes(sku)) return false;
+  // Skip depth profiles (len = 750)
+  if (len === FRONT_HEIGHT_BASE) return false;
+  // Skip horizontal/width profiles: len ≈ unitWidth - 4 (within 30mm range)
+  if (unitWidthMM && Math.abs(len - (unitWidthMM - 4)) <= 30) return false;
+  return true;
+}
+
+function getUnitWidth(unit) {
+  // dims = "WxDxH" e.g. "600×750×592"
+  const parts = unit.dims.replace(/[^0-9×]/g, '').split('×');
+  return parts.length >= 1 ? parseInt(parts[0]) : 600;
+}
+
+function getScaledProfiles(unit, frontHeight) {
+  if (!frontHeight || frontHeight === FRONT_HEIGHT_BASE) return unit.profiles;
+  const scale = frontHeight / FRONT_HEIGHT_BASE;
+  const unitWidth = getUnitWidth(unit);
+  return unit.profiles.map(p => {
+    if (isFrontHeightProfile(p.sku, p.len, unitWidth)) {
+      return { ...p, len: Math.round(p.len * scale), _scaled: true };
+    }
+    return p;
+  });
+}
+
+function getActiveFrontHeight() {
+  if (!activeProjectId) return null;
+  const proj = projects.find(p => p.id === activeProjectId);
+  if (!proj || !proj.frontHeight) return null;
+  const fh = parseInt(proj.frontHeight);
+  return isNaN(fh) ? null : fh;
+}
+
+// ═══════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+  if (name === 'profiles') renderMgmtPage();
+}
+
+// ═══════════════════════════════════════════════
+//  DETAIL MODAL
+// ═══════════════════════════════════════════════
+let currentDetailId = null;
+
+function openDetail(id) {
+  const u = unitsData.find(x => x.id === id);
+  if (!u) return;
+  currentDetailId = id;
+  const qty = selections[id] || 0;
+
+  document.getElementById('detailTitle').textContent = u.name;
+  document.getElementById('detailSub').textContent = `${u.code} · ${u.dims} מ"מ`;
+  document.getElementById('detailImg').src = `imgs/unit_${String(u.imgIdx).padStart(2,'0')}.jpg`;
+  document.getElementById('detailImg').alt = u.name;
+
+  document.getElementById('detailInfo').innerHTML = `
+    <div class="detail-info-row">
+      <span class="detail-info-label">קטגוריה</span>
+      <span class="detail-info-val">${u.cat}</span>
+    </div>
+    <div class="detail-info-row">
+      <span class="detail-info-label">מידות (מ"מ)</span>
+      <span class="detail-info-val">${u.dims}</span>
+    </div>
+    <div class="detail-info-row" style="border:none">
+      <span class="detail-info-label">כמות נבחרת</span>
+      <span class="detail-info-val">
+        <div class="detail-qty-ctrl">
+          <button class="qty-btn minus" onclick="changeQtyDetail('${id}',-1)">−</button>
+          <input class="qty-num" type="number" min="0" max="99" value="${qty}" id="detailQtyNum"
+            onchange="changeQtyDetailInput('${id}',this.value)" onclick="this.select()">
+          <button class="qty-btn plus" onclick="changeQtyDetail('${id}',1)">+</button>
+        </div>
+      </span>
+    </div>`;
+
+  const fh = getActiveFrontHeight();
+  const scaledProfiles = getScaledProfiles(u, fh);
+  document.getElementById('detailTable').innerHTML = buildCutTable(scaledProfiles, Math.max(qty, 1), qty, fh);
+  openModal('detailModal');
+}
+
+function changeQtyDetail(id, delta) {
+  changeQty(id, delta);
+  // Refresh qty display in detail
+  const inp = document.getElementById('detailQtyNum');
+  if (inp) inp.value = selections[id] || 0;
+  // Refresh table with new qty
+  const u = unitsData.find(x => x.id === id);
+  if (u) {
+    const qty = selections[id] || 0;
+    const fh = getActiveFrontHeight();
+    document.getElementById('detailTable').innerHTML = buildCutTable(getScaledProfiles(u, fh), Math.max(qty, 1), qty, fh);
+  }
+}
+
+function changeQtyDetailInput(id, val) {
+  setQtyFromInput(id, val);
+  const u = unitsData.find(x => x.id === id);
+  if (u) {
+    const qty = selections[id] || 0;
+    const fh = getActiveFrontHeight();
+    document.getElementById('detailTable').innerHTML = buildCutTable(getScaledProfiles(u, fh), Math.max(qty, 1), qty, fh);
+  }
+}
+
+function buildCutTable(profiles, qty, selectedQty, frontHeight) {
+  const profs = profiles.filter(p => p.len > 0);
+  const hws = profiles.filter(p => p.len === 0);
+  const hasScaled = profs.some(p => p._scaled);
+  let html = '';
+  let totalProfs = 0;
+
+  if (profs.length) {
+    const fhNote = (frontHeight && frontHeight !== FRONT_HEIGHT_BASE)
+      ? ` <span class="fh-badge">גובה חזית ${frontHeight} מ"מ</span>` : '';
+    html += `<h3>פרופילים לחיתוך${fhNote}</h3>
+    <table class="cut-table">
+      <thead><tr>
+        <th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>כמות ליחידה</th><th>סה"כ</th>
+      </tr></thead><tbody>`;
+    profs.forEach(p => {
+      const total = p.qty * qty;
+      totalProfs += total;
+      const scaledMark = p._scaled ? ' style="color:#D97706;font-weight:700"' : '';
+      html += `<tr>
+        <td><span class="sku-pill">${p.sku}</span></td>
+        <td>${p.label || profileDesc[p.sku] || ''}</td>
+        <td${scaledMark}><b>${p.len}</b></td>
+        <td>${p.qty}</td>
+        <td><b>${total}</b></td>
+      </tr>`;
+    });
+    html += `<tr class="table-total-row"><td colspan="4">סה"כ פרופילים</td><td>${totalProfs}</td></tr>`;
+    html += `</tbody></table>`;
+  }
+
+  if (hws.length) {
+    html += `<h3 style="margin-top:16px">חומרה ומגירות</h3>
+    <table class="cut-table">
+      <thead><tr>
+        <th>מק"ט</th><th>תיאור</th><th>כמות ליחידה</th><th>סה"כ</th>
+      </tr></thead><tbody>`;
+    hws.forEach(p => {
+      const total = p.qty * qty;
+      html += `<tr>
+        <td><span class="sku-pill hw">${p.sku}</span></td>
+        <td>${p.label || profileDesc[p.sku] || ''}</td>
+        <td>${p.qty}</td>
+        <td><b>${total}</b></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════
+//  SUMMARY MODAL
+// ═══════════════════════════════════════════════
+function openSummary() {
+  const active = unitsData.filter(u => (selections[u.id] || 0) > 0);
+  const body = document.getElementById('summaryBody');
+  // Show project info in modal sub-title
+  const proj = getActiveProject();
+  const projSub = document.getElementById('summaryProjSub');
+  if (proj && projSub) {
+    projSub.textContent = `${proj.name}${proj.salesforce ? ' · ' + proj.salesforce : ''}${proj.magic ? ' · מגיק ' + proj.magic : ''}`;
+  } else if (projSub) {
+    projSub.textContent = '';
+  }
+
+  if (!active.length) {
+    body.innerHTML = `<div class="summary-empty">
+      <div style="font-size:40px">📋</div>
+      <p>לא נבחרו יחידות עדיין.<br>חזור לקטלוג ובחר כמויות.</p>
+    </div>`;
+    openModal('summaryModal');
+    return;
+  }
+
+  // Metrics
+  const fh = getActiveFrontHeight();
+  const totalUnits = active.reduce((s, u) => s + (selections[u.id] || 0), 0);
+  const allProfs = buildSummaryData(active, fh);
+  const totalProfs = allProfs.filter(r => r.len > 0).reduce((s, r) => s + r.qty, 0);
+  const uniqueSKUs = new Set(allProfs.filter(r => r.len > 0).map(r => r.sku)).size;
+  const totalHW = allProfs.filter(r => r.len === 0).reduce((s, r) => s + r.qty, 0);
+
+  // Selected units chips
+  const chips = active.map(u => {
+    const q = selections[u.id];
+    return `<div class="su-chip">
+      <img src="imgs/unit_${String(u.imgIdx).padStart(2,'0')}.jpg" alt="${u.name}">
+      <div>
+        <div style="font-weight:600;font-size:12px">${u.name}</div>
+        <div style="font-size:11px;color:#888">${u.code}</div>
+      </div>
+      <strong>×${q}</strong>
+    </div>`;
+  }).join('');
+
+  // Summary table
+  const profRows = allProfs.filter(r => r.len > 0);
+  const hwRows = allProfs.filter(r => r.len === 0);
+  let tableHTML = `<table class="cut-table">
+    <thead><tr>
+      <th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>סה"כ כמות</th>
+    </tr></thead><tbody>`;
+
+  if (profRows.length) {
+    tableHTML += `<tr class="table-section-row"><td colspan="4">פרופילים לחיתוך</td></tr>`;
+    profRows.forEach(r => {
+      tableHTML += `<tr>
+        <td><span class="sku-pill">${r.sku}</span></td>
+        <td>${r.label || profileDesc[r.sku] || ''}</td>
+        <td><b>${r.len}</b></td>
+        <td><b>${r.qty}</b></td>
+      </tr>`;
+    });
+    tableHTML += `<tr class="table-total-row"><td colspan="3">סה"כ פרופילים לחיתוך</td><td>${totalProfs}</td></tr>`;
+  }
+  if (hwRows.length) {
+    tableHTML += `<tr class="table-section-row"><td colspan="4">חומרה ומגירות</td></tr>`;
+    hwRows.forEach(r => {
+      tableHTML += `<tr>
+        <td><span class="sku-pill hw">${r.sku}</span></td>
+        <td>${r.label || profileDesc[r.sku] || ''}</td>
+        <td>—</td>
+        <td><b>${r.qty}</b></td>
+      </tr>`;
+    });
+  }
+  tableHTML += `</tbody></table>`;
+
+  // Build project info block
+  let projBlock = '';
+  if (proj) {
+    projBlock = `<div class="sum-proj-header">
+      <div class="sum-proj-field"><div class="sum-proj-label">לקוח</div><div class="sum-proj-val">${proj.name}</div></div>
+      ${proj.magic ? `<div class="sum-proj-field"><div class="sum-proj-label">מגיק</div><div class="sum-proj-val">${proj.magic}</div></div>` : ''}
+      ${proj.salesforce ? `<div class="sum-proj-field"><div class="sum-proj-label">Salesforce</div><div class="sum-proj-val">${proj.salesforce}</div></div>` : ''}
+      <div class="sum-proj-field"><div class="sum-proj-label">סוג חזית</div><div class="sum-proj-val">${proj.frontType || '—'}</div></div>
+      <div class="sum-proj-field"><div class="sum-proj-label">גובה חזית</div><div class="sum-proj-val">${proj.frontHeight || 750} מ"מ</div></div>
+      <div class="sum-proj-field"><div class="sum-proj-label">תאריך</div><div class="sum-proj-val">${proj.createdAt || ''}</div></div>
+    </div>`;
+  }
+
+  body.innerHTML = `
+    ${projBlock}
+    <div class="metrics">
+      <div class="metric"><div class="metric-val">${totalUnits}</div><div class="metric-label">סה"כ ארונות</div></div>
+      <div class="metric"><div class="metric-val">${totalProfs}</div><div class="metric-label">פרופילים לחיתוך</div></div>
+      <div class="metric"><div class="metric-val">${uniqueSKUs}</div><div class="metric-label">מק"טים שונים</div></div>
+      <div class="metric"><div class="metric-val">${totalHW}</div><div class="metric-label">יחידות חומרה</div></div>
+    </div>
+    <div>
+      <div class="section-title">יחידות נבחרות</div>
+      <div class="selected-units">${chips}</div>
+    </div>
+    <div>
+      <div class="section-title">טבלת סיכום</div>
+      ${tableHTML}
+    </div>
+    <div class="summary-actions">
+      <button class="action-btn primary" onclick="exportCSV()">⬇ ייצוא CSV</button>
+      <button class="action-btn" onclick="window.print()">🖨 הדפסה</button>
+    </div>`;
+
+  openModal('summaryModal');
+}
+
+function buildSummaryData(active, frontHeight) {
+  const map = new Map(); // key = sku+len+label
+  active.forEach(u => {
+    const qty = selections[u.id] || 0;
+    const profiles = getScaledProfiles(u, frontHeight);
+    profiles.forEach(p => {
+      const key = `${p.sku}|${p.len}|${p.label || ''}`;
+      if (map.has(key)) {
+        map.get(key).qty += p.qty * qty;
+      } else {
+        map.set(key, { sku: p.sku, len: p.len, label: p.label, qty: p.qty * qty });
+      }
+    });
+  });
+  // Sort: profiles first by sku then by len desc, then hardware
+  const rows = [...map.values()];
+  const profs = rows.filter(r => r.len > 0).sort((a, b) =>
+    a.sku.localeCompare(b.sku) || b.len - a.len
+  );
+  const hws = rows.filter(r => r.len === 0).sort((a, b) =>
+    a.sku.localeCompare(b.sku)
+  );
+  return [...profs, ...hws];
+}
+
+// ═══════════════════════════════════════════════
+//  CSV EXPORT
+// ═══════════════════════════════════════════════
+function exportCSV() {
+  const active = unitsData.filter(u => (selections[u.id] || 0) > 0);
+  if (!active.length) { alert('לא נבחרו יחידות'); return; }
+
+  const fh = getActiveFrontHeight();
+  const proj = getActiveProject();
+  const dateStr = new Date().toLocaleDateString('he-IL');
+
+  // Project metadata rows (comment lines)
+  const metaRows = [];
+  if (proj) {
+    metaRows.push([`# שם לקוח: ${proj.name}`]);
+    if (proj.magic) metaRows.push([`# מספר מגיק: ${proj.magic}`]);
+    if (proj.salesforce) metaRows.push([`# הזמנה Salesforce: ${proj.salesforce}`]);
+    metaRows.push([`# סוג חזית: ${proj.frontType || '—'} | גובה: ${proj.frontHeight || 750} מ"מ`]);
+    metaRows.push([`# תאריך: ${dateStr}`]);
+    metaRows.push([]); // blank line
+  }
+
+  const dataRows = [['מק"ט', 'תיאור', 'אורך (מ"מ)', 'כמות', 'יחידה']];
+  active.forEach(u => {
+    const qty = selections[u.id];
+    const profiles = getScaledProfiles(u, fh);
+    profiles.forEach(p => {
+      dataRows.push([
+        p.sku,
+        p.label || profileDesc[p.sku] || '',
+        p.len > 0 ? p.len : '—',
+        p.qty * qty,
+        u.name
+      ]);
+    });
+  });
+
+  const allRows = [
+    ...metaRows.map(r => r.map(c => `"${String(c || '').replace(/"/g, '""')}"`).join(',')),
+    ...dataRows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))
+  ];
+  const csv = '\uFEFF' + allRows.join('\n');
+  const date = new Date().toISOString().slice(0, 10);
+  const clientName = proj ? proj.name.replace(/[^a-zA-Z\u0590-\u05FF0-9]/g, '_') : 'alumex';
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `alumex_cut_list_${clientName}_${date}.csv`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL HELPERS
+// ═══════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // Only restore scroll if no other modal is open
+  if (!document.querySelector('.modal-overlay.open')) {
+    document.body.style.overflow = '';
+  }
+  // Reset fullscreen if detail
+  if (id === 'detailModal' && detailFS) toggleFS('detailBox', 'detailFsBtn');
+  if (id === 'summaryModal' && summaryFS) toggleFS('summaryBox', 'sumFsBtn');
+}
+function handleOverlayClick(e, modalId) {
+  if (e.target === document.getElementById(modalId)) closeModal(modalId);
+}
+function toggleFS(boxId, btnId) {
+  const box = document.getElementById(boxId);
+  box.classList.toggle('fullscreen');
+  const isNowFS = box.classList.contains('fullscreen');
+  document.getElementById(btnId).textContent = isNowFS ? '⊡' : '⛶';
+  if (boxId === 'detailBox') detailFS = isNowFS;
+  if (boxId === 'summaryBox') summaryFS = isNowFS;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const open = document.querySelector('.modal-overlay.open');
+    if (open) closeModal(open.id);
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  MANAGEMENT PAGE
+// ═══════════════════════════════════════════════
+
+// Determine if a SKU is hardware (len=0 always) based on existing data
+function isHardwareSku(sku) {
+  for (const u of UNITS) {
+    for (const p of u.profiles) {
+      if (p.sku === sku) return p.len === 0;
+    }
+  }
+  return false;
+}
+
+function renderMgmtPage() {
+  renderProfilesTable();
+  renderUnitsTable();
+}
+
+function renderProfilesTable() {
+  const tbody = document.getElementById('profilesTableBody');
+  // Collect all unique SKUs from all units
+  const allSkus = [...new Set(UNITS.flatMap(u => u.profiles.map(p => p.sku)))].sort();
+
+  tbody.innerHTML = allSkus.map(sku => {
+    const isHW = isHardwareSku(sku);
+    const desc = profileDesc[sku] || '';
+    const origDesc = PROFILE_DESC[sku] || '';
+    const changed = desc !== origDesc ? ' changed' : '';
+    return `<tr>
+      <td><span class="sku-code${isHW ? ' hw' : ''}">${sku}</span></td>
+      <td><input class="mgmt-input${changed}" type="text" id="prof_${sku}"
+        value="${desc.replace(/"/g, '&quot;')}"
+        placeholder="${origDesc}"
+        oninput="markChanged(this, '${origDesc}')"></td>
+      <td><span class="type-badge ${isHW ? 'hardware' : 'profile'}">${isHW ? 'חומרה' : 'פרופיל'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderUnitsTable() {
+  const tbody = document.getElementById('unitsTableBody');
+  tbody.innerHTML = unitsData.map((u, i) => {
+    const orig = UNITS[i];
+    const nameChanged = u.name !== orig.name ? ' changed' : '';
+    const codeChanged = u.code !== orig.code ? ' changed' : '';
+    return `<tr>
+      <td><img src="imgs/unit_${String(u.imgIdx).padStart(2,'0')}.jpg"
+        style="width:48px;height:48px;object-fit:contain;border-radius:6px;border:1px solid #eee;background:#f9f9f7"></td>
+      <td><input class="mgmt-input${codeChanged}" type="text" id="ucode_${u.id}"
+        value="${u.code.replace(/"/g, '&quot;')}"
+        placeholder="${orig.code}"
+        oninput="markChanged(this, '${orig.code}')"></td>
+      <td><input class="mgmt-input${nameChanged}" type="text" id="uname_${u.id}"
+        value="${u.name.replace(/"/g, '&quot;')}"
+        placeholder="${orig.name}"
+        oninput="markChanged(this, '${orig.name}')"></td>
+      <td><span class="cat-tag" data-cat="${u.cat}" style="position:static;display:inline-block">${u.cat}</span></td>
+      <td style="font-size:12px;color:#888">${u.dims}</td>
+    </tr>`;
+  }).join('');
+}
+
+function markChanged(el, origVal) {
+  el.classList.toggle('changed', el.value !== origVal);
+}
+
+function saveProfiles() {
+  const allSkus = [...new Set(UNITS.flatMap(u => u.profiles.map(p => p.sku)))];
+  allSkus.forEach(sku => {
+    const inp = document.getElementById('prof_' + sku);
+    if (inp) profileDesc[sku] = inp.value || PROFILE_DESC[sku];
+  });
+  saveProfileOverrides();
+  showNotice('profilesSaveNotice');
+  renderProfilesTable();
+}
+
+function saveUnits() {
+  unitsData.forEach(u => {
+    const nameInp = document.getElementById('uname_' + u.id);
+    const codeInp = document.getElementById('ucode_' + u.id);
+    if (nameInp && nameInp.value.trim()) u.name = nameInp.value.trim();
+    if (codeInp && codeInp.value.trim()) u.code = codeInp.value.trim();
+  });
+  saveUnitOverrides();
+  showNotice('unitsSaveNotice');
+  renderUnitsTable();
+  renderGrid(); // refresh catalog
+}
+
+function resetProfiles() {
+  if (!confirm('לאפס את כל שמות הפרופילים לברירת המחדל?')) return;
+  profileDesc = { ...PROFILE_DESC };
+  try { localStorage.removeItem('alumex_profiles'); } catch(e){}
+  renderProfilesTable();
+  showNotice('profilesSaveNotice');
+}
+
+function resetUnits() {
+  if (!confirm('לאפס את כל שמות היחידות לברירת המחדל?')) return;
+  unitsData = UNITS.map(u => ({ ...u }));
+  try { localStorage.removeItem('alumex_units'); } catch(e){}
+  renderUnitsTable();
+  renderGrid();
+  showNotice('unitsSaveNotice');
+}
+
+function showNotice(id) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════
+//  PROJECT MANAGEMENT
+// ═══════════════════════════════════════════════
+
+function getActiveProject() {
+  if (!activeProjectId) return null;
+  return projects.find(p => p.id === activeProjectId) || null;
+}
+
+function saveCurrentProject() {
+  if (!activeProjectId) return;
+  const proj = projects.find(p => p.id === activeProjectId);
+  if (proj) {
+    proj.selections = { ...selections };
+    saveProjects();
+  }
+}
+
+function openNewProjectModal(editId) {
+  const isEdit = !!editId;
+  document.getElementById('projModalTitle').textContent = isEdit ? 'עריכת פרויקט' : 'פרויקט חדש';
+  document.getElementById('projSubmitBtn') && (document.getElementById('projSubmitBtn').textContent = isEdit ? 'שמור שינויים' : 'צור פרויקט');
+  document.querySelector('.proj-submit-btn').textContent = isEdit ? 'שמור שינויים' : 'צור פרויקט';
+  document.getElementById('projEditId').value = editId || '';
+
+  if (isEdit) {
+    const proj = projects.find(p => p.id === editId);
+    if (proj) {
+      document.getElementById('projFieldName').value = proj.name || '';
+      document.getElementById('projFieldMagic').value = proj.magic || '';
+      document.getElementById('projFieldSF').value = proj.salesforce || '';
+      document.getElementById('projFieldFH').value = proj.frontHeight || '';
+      selectedFrontType = proj.frontType || 'הדבקה';
+    }
+  } else {
+    document.getElementById('projFieldName').value = '';
+    document.getElementById('projFieldMagic').value = '';
+    document.getElementById('projFieldSF').value = '';
+    document.getElementById('projFieldFH').value = '';
+    selectedFrontType = 'הדבקה';
+  }
+  // Update toggle UI
+  document.querySelectorAll('.front-toggle-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === selectedFrontType);
+  });
+  document.getElementById('projFieldName').classList.remove('required-empty');
+  openModal('projectModal');
+}
+
+function selectFrontType(type) {
+  selectedFrontType = type;
+  document.querySelectorAll('.front-toggle-btn').forEach(b => {
+    b.classList.toggle('selected', b.textContent === type);
+  });
+}
+
+function submitProjectForm() {
+  const nameEl = document.getElementById('projFieldName');
+  const name = nameEl.value.trim();
+  if (!name) {
+    nameEl.classList.add('required-empty');
+    nameEl.focus();
+    return;
+  }
+  nameEl.classList.remove('required-empty');
+
+  const editId = document.getElementById('projEditId').value;
+  const fhVal = document.getElementById('projFieldFH').value.trim();
+  const frontHeight = fhVal ? parseInt(fhVal) : null;
+  const today = new Date().toLocaleDateString('he-IL');
+
+  if (editId) {
+    // Edit existing
+    const proj = projects.find(p => p.id === editId);
+    if (proj) {
+      proj.name = name;
+      proj.magic = document.getElementById('projFieldMagic').value.trim();
+      proj.salesforce = document.getElementById('projFieldSF').value.trim();
+      proj.frontType = selectedFrontType;
+      proj.frontHeight = frontHeight;
+    }
+  } else {
+    // New project — save current selections to current project first
+    saveCurrentProject();
+    const newProj = {
+      id: 'proj_' + Date.now(),
+      name,
+      magic: document.getElementById('projFieldMagic').value.trim(),
+      salesforce: document.getElementById('projFieldSF').value.trim(),
+      frontType: selectedFrontType,
+      frontHeight,
+      selections: {},
+      createdAt: today
+    };
+    projects.push(newProj);
+    activeProjectId = newProj.id;
+    selections = {};
+    renderGrid();
+    updateHeader();
+  }
+  saveProjects();
+  renderProjectHeader();
+  closeModal('projectModal');
+}
+
+function loadProject(id) {
+  if (id === activeProjectId) return;
+  // Save current project's selections
+  saveCurrentProject();
+  // Load new
+  activeProjectId = id;
+  const proj = projects.find(p => p.id === id);
+  if (proj) {
+    selections = { ...proj.selections };
+  }
+  renderGrid();
+  updateHeader();
+  renderProjectHeader();
+  saveProjects();
+}
+
+function deleteProject(id) {
+  const proj = projects.find(p => p.id === id);
+  if (!proj) return;
+  if (!confirm(`למחוק את הפרויקט של "${proj.name}"? הפעולה לא ניתנת לביטול.`)) return;
+  projects = projects.filter(p => p.id !== id);
+  if (activeProjectId === id) {
+    activeProjectId = projects.length ? projects[projects.length - 1].id : null;
+    if (activeProjectId) {
+      const newActive = projects.find(p => p.id === activeProjectId);
+      selections = newActive ? { ...newActive.selections } : {};
+    } else {
+      selections = {};
+    }
+    renderGrid();
+    updateHeader();
+  }
+  saveProjects();
+  renderProjectHeader();
+  renderProjectDropdown();
+}
+
+function toggleProjectDropdown() {
+  const dd = document.getElementById('projDropdown');
+  const isOpen = dd.classList.contains('open');
+  if (!isOpen) renderProjectDropdown();
+  dd.classList.toggle('open');
+}
+
+function renderProjectDropdown() {
+  const list = document.getElementById('projList');
+  if (!projects.length) {
+    list.innerHTML = '<div style="padding:14px;text-align:center;font-size:12px;color:#aaa">אין פרויקטים שמורים</div>';
+    return;
+  }
+  list.innerHTML = projects.map(p => `
+    <div class="proj-dropdown-item${p.id === activeProjectId ? ' active-item' : ''}" onclick="loadProject('${p.id}'); toggleProjectDropdown()">
+      <div class="proj-item-check">${p.id === activeProjectId ? '✓' : ''}</div>
+      <div class="proj-item-info">
+        <div class="proj-item-name">${escHtml(p.name)}</div>
+        <div class="proj-item-meta">${p.salesforce ? p.salesforce + ' · ' : ''}${p.createdAt || ''}</div>
+      </div>
+      <div class="proj-item-btns" onclick="event.stopPropagation()">
+        <button class="proj-icon-btn" onclick="openNewProjectModal('${p.id}'); document.getElementById('projDropdown').classList.remove('open')" title="ערוך">✏</button>
+        <button class="proj-icon-btn del" onclick="deleteProject('${p.id}')" title="מחק">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderProjectHeader() {
+  const proj = getActiveProject();
+  const badge = document.getElementById('projNameBadge');
+  const btn = document.getElementById('projDropBtn');
+  if (proj) {
+    badge.textContent = proj.name;
+    btn.classList.add('active-proj');
+  } else {
+    badge.textContent = 'ללא פרויקט';
+    btn.classList.remove('active-proj');
+  }
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
