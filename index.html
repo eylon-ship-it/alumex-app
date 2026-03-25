@@ -1105,6 +1105,18 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh
         <th>ברקוד</th><th>פריט</th><th>אורך (מ"מ)</th><th>רוחב (מ"מ)</th><th>כמות ליח'</th><th>סה"כ</th>
       </tr></thead><tbody>`;
 
+      // Build front→lokobond index mapping (sorted by height, paired by order)
+      const frontIdxs = []; const lokoIdxs = [];
+      scaledPanels.forEach((p, pi) => {
+        const lbl = p.label || '';
+        if (lbl.includes('חזית') && !lbl.includes('לוקובונד')) frontIdxs.push(pi);
+        else if (lbl.includes('לוקובונד')) lokoIdxs.push(pi);
+      });
+      const frontToLokoKey = new Map();
+      frontIdxs.forEach((fi, i) => {
+        if (lokoIdxs[i] !== undefined) frontToLokoKey.set(fi, `pan${lokoIdxs[i]}_len`);
+      });
+
       scaledPanels.forEach((p, pi) => {
         const keyLen = `pan${pi}_len`;
         const keyW   = `pan${pi}_wid`;
@@ -1115,7 +1127,8 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh
         const isOvrWid = unitDimSettings[uid]?.overrides?.[keyW]   !== undefined;
         const scaledStyle = (p._scaled && !isOvrLen) ? ' style="color:#D97706"' : '';
 
-        const cellLen = `<span class="dim-cell${isOvrLen?' overridden':''}" onclick="editDimCell(event,'${uid}','${keyLen}',${vLen})"><b>${Number.isInteger(vLen)?vLen:parseFloat(vLen.toFixed(1))}</b></span>`;
+        const linkedLokoKey = frontToLokoKey.get(pi) || '';
+        const cellLen = `<span class="dim-cell${isOvrLen?' overridden':''}" onclick="editDimCell(event,'${uid}','${keyLen}',${vLen},'${linkedLokoKey}')"><b>${Number.isInteger(vLen)?vLen:parseFloat(vLen.toFixed(1))}</b></span>`;
         const cellWid = `<span class="dim-cell${isOvrWid?' overridden':''}" onclick="editDimCell(event,'${uid}','${keyW}',${vWid})"><b>${vWid}</b></span>`;
 
         html += `<tr>
@@ -1212,7 +1225,7 @@ function resetAllOverrides(unitId) {
   refreshDetailTable();
 }
 
-function editDimCell(event, unitId, key, currentVal) {
+function editDimCell(event, unitId, key, currentVal, linkedKey) {
   const span = event.currentTarget;
   if (span.querySelector('input')) return; // already editing
 
@@ -1233,8 +1246,10 @@ function editDimCell(event, unitId, key, currentVal) {
     if (newVal !== String(currentVal)) {
       if (newVal === '') {
         setDimOverride(unitId, key, null);
+        if (linkedKey) setDimOverride(unitId, linkedKey, null);
       } else {
         setDimOverride(unitId, key, newVal);
+        if (linkedKey) setDimOverride(unitId, linkedKey, +newVal - GLUE_DEDUCTION);
       }
       refreshDetailTable();
     } else {
