@@ -145,6 +145,19 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .sku-pill.hw{background:#DCFCE7;color:#15803D}
 .table-section-row td{background:#F4F4F2;font-size:11px;font-weight:700;color:#666;padding:5px 10px}
 .table-total-row td{font-weight:700;background:#EFF6FF;color:var(--primary);padding:7px 10px;border-top:2px solid #BFDBFE}
+/* ── EDITABLE DIMS ── */
+.dim-cell{cursor:pointer;border-radius:4px;padding:2px 4px;transition:background 0.12s;display:inline-block;min-width:36px;text-align:center}
+.dim-cell:hover{background:#EFF6FF;color:var(--primary)}
+.dim-cell.overridden{color:#059669;font-weight:700}
+.dim-cell.overridden::after{content:'*';font-size:9px;vertical-align:super;margin-right:1px}
+.dim-edit-input{width:70px;padding:3px 6px;border:1.5px solid var(--primary);border-radius:5px;font-family:inherit;font-size:13px;font-weight:700;text-align:center;color:var(--primary);background:#EFF6FF;outline:none}
+.unit-fdh-row{display:flex;align-items:center;gap:8px;padding:8px 0 4px;flex-wrap:wrap}
+.unit-fdh-label{font-size:12px;color:var(--muted);white-space:nowrap}
+.unit-fdh-input{width:80px;padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;text-align:center;background:#fafafa}
+.unit-fdh-input:focus{outline:none;border-color:var(--primary);background:#EFF6FF}
+.unit-fdh-input.set{border-color:#059669;background:#ECFDF5;color:#059669;font-weight:700}
+.reset-overrides-btn{padding:4px 10px;border:1px solid #FCA5A5;border-radius:6px;background:#FFF1F1;color:#DC2626;font-family:inherit;font-size:11px;cursor:pointer;transition:all 0.15s}
+.reset-overrides-btn:hover{background:#FEE2E2}
 
 /* ── TABS ── */
 .tab-nav{display:flex;gap:0;border-bottom:2px solid var(--border)}
@@ -560,13 +573,14 @@ const CATS = ["הכל", ...new Set(UNITS.map(u => u.cat))];
 // ═══════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════
-let selections = {}; // {id: qty}
+let selections = {};       // {id: qty}
+let unitDimSettings = {};  // {id: {firstDrawerHeight, overrides: {key: val}}}
 let activeCat = "הכל";
 let detailFS = false;
 let summaryFS = false;
-let projects = [];          // [{id, name, magic, salesforce, frontType, frontHeight, selections, createdAt}]
-let activeProjectId = null; // id of active project
-let selectedFrontType = 'הדבקה'; // temp state for project modal
+let projects = [];          // [{id, name, magic, salesforce, frontType, frontHeight, firstDrawerHeight, selections, unitDimSettings, createdAt}]
+let activeProjectId = null;
+let selectedFrontType = 'הדבקה';
 
 // ═══════════════════════════════════════════════
 //  RUNTIME OVERRIDES (editable names)
@@ -590,6 +604,11 @@ function loadStorage() {
 }
 function saveProjects() {
   try {
+    // Embed current unitDimSettings into active project before saving
+    if (activeProjectId) {
+      const proj = projects.find(p => p.id === activeProjectId);
+      if (proj) proj.unitDimSettings = JSON.parse(JSON.stringify(unitDimSettings));
+    }
     localStorage.setItem('alumex_projects', JSON.stringify(projects));
     localStorage.setItem('alumex_active_project', activeProjectId || '');
   } catch(e){}
@@ -602,9 +621,50 @@ function loadProjects() {
     if (ap && projects.find(p => p.id === ap)) {
       activeProjectId = ap;
       const proj = projects.find(p => p.id === ap);
-      if (proj) selections = { ...proj.selections };
+      if (proj) {
+        selections = { ...proj.selections };
+        unitDimSettings = proj.unitDimSettings ? JSON.parse(JSON.stringify(proj.unitDimSettings)) : {};
+      }
     }
   } catch(e){}
+}
+
+// ─── Unit dim settings helpers ─────────────────────────────────
+function getUnitSettings(unitId) {
+  if (!unitDimSettings[unitId]) unitDimSettings[unitId] = { firstDrawerHeight: null, overrides: {} };
+  return unitDimSettings[unitId];
+}
+function getUnitFirstDrawerHeight(unitId) {
+  const us = unitDimSettings[unitId];
+  return (us && us.firstDrawerHeight) ? us.firstDrawerHeight : null;
+}
+function setUnitFirstDrawerHeight(unitId, val) {
+  getUnitSettings(unitId).firstDrawerHeight = val ? parseInt(val) : null;
+  saveProjects();
+}
+function setDimOverride(unitId, key, val) {
+  const s = getUnitSettings(unitId);
+  if (val === null || val === '') {
+    delete s.overrides[key];
+  } else {
+    const n = parseFloat(val);
+    s.overrides[key] = isNaN(n) ? val : n;
+  }
+  saveProjects();
+}
+function getDimOverride(unitId, key, defaultVal) {
+  const s = unitDimSettings[unitId];
+  if (s && s.overrides && s.overrides[key] !== undefined) return s.overrides[key];
+  return defaultVal;
+}
+function hasAnyOverrides(unitId) {
+  const s = unitDimSettings[unitId];
+  if (!s) return false;
+  return s.firstDrawerHeight || (s.overrides && Object.keys(s.overrides).length > 0);
+}
+function clearUnitOverrides(unitId) {
+  delete unitDimSettings[unitId];
+  saveProjects();
 }
 function saveProfileOverrides() {
   try { localStorage.setItem('alumex_profiles', JSON.stringify(profileDesc)); } catch(e){}
@@ -951,66 +1011,110 @@ function changeQtyDetailInput(id, val) {
   }
 }
 
-function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, firstDrawerHeight) {
+function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh) {
   const profs = profiles.filter(p => p.len > 0);
-  const hws = profiles.filter(p => p.len === 0);
+  const hws   = profiles.filter(p => p.len === 0);
   let html = '';
   let totalProfs = 0;
 
-  // ─── סקשן מידות חזיתות (חדש) ───────────────────────────────
   if (unit) {
-    const cabinetH = getCabinetHeight(unit);
-    const totalH = frontHeight || cabinetH;
-    const unitWidth = getUnitWidth(unit);
-    const frontData = computeFrontHeights(unit, totalH, firstDrawerHeight);
+    const uid = unit.id;
+    const cabinetH   = getCabinetHeight(unit);
+    const totalH     = frontHeight || cabinetH;
+    const unitWidth  = getUnitWidth(unit);
+    const unitFdh    = getUnitFirstDrawerHeight(uid);
+    const effectiveFdh = unitFdh || projectFdh;
+    const frontData  = computeFrontHeights(unit, totalH, effectiveFdh);
+    const hasOverrides = hasAnyOverrides(uid);
+
+    // ─── Per-unit firstDrawerHeight input ─────────────────────
+    if (frontData && frontData.length > 1) {
+      const fdhVal = unitFdh || '';
+      const fdhSet = !!unitFdh;
+      html += `<div class="unit-fdh-row">
+        <span class="unit-fdh-label">גובה מגירה ראשונה (יחידה זו):</span>
+        <input class="unit-fdh-input${fdhSet ? ' set' : ''}" type="number"
+          id="ufdh_${uid}" value="${fdhVal}" min="50" max="500"
+          placeholder="${effectiveFdh || 'מהפרויקט'}"
+          oninput="onUnitFdhChange('${uid}',this.value)"
+          title="השאר ריק כדי לרשת מהפרויקט">
+        ${fdhSet ? `<button class="reset-overrides-btn" onclick="clearUnitFdh('${uid}')" title="חזור לערך הפרויקט">↺ נקה</button>` : ''}
+      </div>`;
+    }
+
+    // ─── Front cut dimensions table ───────────────────────────
     if (frontData && frontData.length) {
       const hasNonInt = frontData.some(f => f.isNonInteger);
       const fhLabel = (totalH !== cabinetH) ? ` <span class="fh-badge">גובה ${totalH} מ"מ</span>` : '';
-      html += `<h3>מידות חיתוך חזיתות${fhLabel}</h3>`;
+      const overrideBadge = hasOverrides ? ` <span style="font-size:10px;background:#D1FAE5;color:#059669;padding:2px 7px;border-radius:10px;font-weight:600">מותאם אישית</span>` : '';
+      html += `<h3>מידות חיתוך חזיתות${fhLabel}${overrideBadge}`;
+      if (hasOverrides) html += ` <button class="reset-overrides-btn" onclick="resetAllOverrides('${uid}')" style="margin-right:6px">↺ אפס הכל</button>`;
+      html += `</h3>`;
       if (hasNonInt) {
-        html += `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:#92400E">
-          ⚠️ מידה לא עגולה — בדוק עם המעצב לפני חיתוך</div>`;
+        html += `<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:#92400E">⚠️ מידה לא עגולה — בדוק עם המעצב לפני חיתוך</div>`;
       }
-      html += `<table class="cut-table">
-        <thead><tr>
-          <th>חזית</th>
-          <th>גובה מסגרת</th><th>גובה הדבקה</th>
-          <th>רוחב מסגרת</th><th>רוחב הדבקה</th>
-        </tr></thead><tbody>`;
-      const frameW = unitWidth - 8;
-      const glueW  = unitWidth - 4;
+      html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">לחץ על מידה לעריכה ידנית</div>`;
+      html += `<table class="cut-table"><thead><tr>
+        <th>חזית</th><th>גובה מסגרת</th><th>גובה הדבקה</th><th>רוחב מסגרת</th><th>רוחב הדבקה</th>
+      </tr></thead><tbody>`;
+
+      const baseFrameW = unitWidth - 8;
+      const baseGlueW  = unitWidth - 4;
+
       frontData.forEach((f, i) => {
-        const warn = f.isNonInteger ? ' style="color:#D97706;font-weight:700"' : '';
         const label = frontData.length === 1 ? 'דלת' : (i === 0 ? `מגירה ${i+1} (קטנה)` : `מגירה ${i+1}`);
+        const warn  = f.isNonInteger ? ' style="color:#D97706"' : '';
+
+        const keys = {
+          frame:  `f${i}_frame`,  glue:   `f${i}_glue`,
+          frameW: `f${i}_frameW`, glueW:  `f${i}_glueW`
+        };
+        const vals = {
+          frame:  getDimOverride(uid, keys.frame,  Number.isInteger(f.frame)  ? f.frame  : parseFloat(f.frame.toFixed(1))),
+          glue:   getDimOverride(uid, keys.glue,   Number.isInteger(f.glue)   ? f.glue   : parseFloat(f.glue.toFixed(1))),
+          frameW: getDimOverride(uid, keys.frameW, baseFrameW),
+          glueW:  getDimOverride(uid, keys.glueW,  baseGlueW)
+        };
+
+        const cell = (key, v, warn) => {
+          const isOvr = (unitDimSettings[uid] && unitDimSettings[uid].overrides && unitDimSettings[uid].overrides[key] !== undefined);
+          return `<td${warn||''}><span class="dim-cell${isOvr?' overridden':''}" onclick="editDimCell(event,'${uid}','${key}',${v})">${v}</span></td>`;
+        };
+
         html += `<tr>
           <td>${label}</td>
-          <td${warn}><b>${Number.isInteger(f.frame) ? f.frame : f.frame.toFixed(1)}</b></td>
-          <td${warn}><b>${Number.isInteger(f.glue)  ? f.glue  : f.glue.toFixed(1)}</b></td>
-          <td><b>${frameW}</b></td>
-          <td><b>${glueW}</b></td>
+          ${cell(keys.frame,  vals.frame,  warn)}
+          ${cell(keys.glue,   vals.glue,   warn)}
+          ${cell(keys.frameW, vals.frameW, '')}
+          ${cell(keys.glueW,  vals.glueW,  '')}
         </tr>`;
       });
       html += `</tbody></table>`;
     }
   }
 
-  // ─── פרופילים לחיתוך ────────────────────────────────────────
+  // ─── Profiles ─────────────────────────────────────────────
   if (profs.length) {
-    const fhNote = (frontHeight && frontHeight !== getCabinetHeight(unit || {}))
+    const uid = unit ? unit.id : null;
+    const fhNote = (unit && frontHeight && frontHeight !== getCabinetHeight(unit))
       ? ` <span class="fh-badge">גובה חזית ${frontHeight} מ"מ</span>` : '';
     html += `<h3 style="margin-top:16px">פרופילים לחיתוך${fhNote}</h3>
-    <table class="cut-table">
-      <thead><tr>
-        <th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>כמות ליחידה</th><th>סה"כ</th>
-      </tr></thead><tbody>`;
-    profs.forEach(p => {
+    <table class="cut-table"><thead><tr>
+      <th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>כמות ליחידה</th><th>סה"כ</th>
+    </tr></thead><tbody>`;
+    profs.forEach((p, pi) => {
       const total = p.qty * qty;
       totalProfs += total;
-      const scaledMark = p._scaled ? ' style="color:#D97706;font-weight:700"' : '';
+      const pKey = uid ? `p${pi}_${p.sku}` : null;
+      const pVal = pKey ? getDimOverride(uid, pKey, p.len) : p.len;
+      const isOvr = pKey && unitDimSettings[uid] && unitDimSettings[uid].overrides && unitDimSettings[uid].overrides[pKey] !== undefined;
+      const scaledMark = (p._scaled && !isOvr) ? ' style="color:#D97706;font-weight:700"' : '';
       html += `<tr>
         <td><span class="sku-pill">${p.sku}</span></td>
         <td>${p.label || profileDesc[p.sku] || ''}</td>
-        <td${scaledMark}><b>${p.len}</b></td>
+        <td${scaledMark}>${uid
+          ? `<span class="dim-cell${isOvr?' overridden':''}" onclick="editDimCell(event,'${uid}','${pKey}',${pVal})"><b>${pVal}</b></span>`
+          : `<b>${p.len}</b>`}</td>
         <td>${p.qty}</td>
         <td><b>${total}</b></td>
       </tr>`;
@@ -1021,23 +1125,94 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, firstDrawe
 
   if (hws.length) {
     html += `<h3 style="margin-top:16px">חומרה ומגירות</h3>
-    <table class="cut-table">
-      <thead><tr>
-        <th>מק"ט</th><th>תיאור</th><th>כמות ליחידה</th><th>סה"כ</th>
-      </tr></thead><tbody>`;
+    <table class="cut-table"><thead><tr>
+      <th>מק"ט</th><th>תיאור</th><th>כמות ליחידה</th><th>סה"כ</th>
+    </tr></thead><tbody>`;
     hws.forEach(p => {
       const total = p.qty * qty;
       html += `<tr>
         <td><span class="sku-pill hw">${p.sku}</span></td>
         <td>${p.label || profileDesc[p.sku] || ''}</td>
-        <td>${p.qty}</td>
-        <td><b>${total}</b></td>
+        <td>${p.qty}</td><td><b>${total}</b></td>
       </tr>`;
     });
     html += `</tbody></table>`;
   }
 
   return html;
+}
+
+// ═══════════════════════════════════════════════
+//  PER-UNIT DIM EDITING
+// ═══════════════════════════════════════════════
+
+function refreshDetailTable() {
+  if (!currentDetailId) return;
+  const u = unitsData.find(x => x.id === currentDetailId);
+  if (!u) return;
+  const qty = selections[currentDetailId] || 0;
+  const fh  = getActiveFrontHeight();
+  const fdh = getActiveFirstDrawerHeight();
+  document.getElementById('detailTable').innerHTML =
+    buildCutTable(getScaledProfiles(u, fh, fdh), Math.max(qty, 1), qty, fh, u, fdh);
+}
+
+function onUnitFdhChange(unitId, val) {
+  setUnitFirstDrawerHeight(unitId, val);
+  const el = document.getElementById(`ufdh_${unitId}`);
+  if (el) el.classList.toggle('set', !!val);
+  refreshDetailTable();
+}
+
+function clearUnitFdh(unitId) {
+  setUnitFirstDrawerHeight(unitId, null);
+  refreshDetailTable();
+}
+
+function resetAllOverrides(unitId) {
+  clearUnitOverrides(unitId);
+  refreshDetailTable();
+}
+
+function editDimCell(event, unitId, key, currentVal) {
+  const span = event.currentTarget;
+  if (span.querySelector('input')) return; // already editing
+
+  const input = document.createElement('input');
+  input.className = 'dim-edit-input';
+  input.type = 'number';
+  input.step = '0.5';
+  input.value = currentVal;
+  input.style.width = Math.max(60, String(currentVal).length * 10) + 'px';
+
+  span.innerHTML = '';
+  span.appendChild(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const newVal = input.value.trim();
+    if (newVal !== String(currentVal)) {
+      if (newVal === '') {
+        setDimOverride(unitId, key, null);
+      } else {
+        setDimOverride(unitId, key, newVal);
+      }
+      refreshDetailTable();
+    } else {
+      // No change — just re-render to restore span
+      refreshDetailTable();
+    }
+  };
+
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') {
+      input.removeEventListener('blur', commit);
+      refreshDetailTable();
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════
@@ -1396,6 +1571,7 @@ function saveCurrentProject() {
   const proj = projects.find(p => p.id === activeProjectId);
   if (proj) {
     proj.selections = { ...selections };
+    proj.unitDimSettings = JSON.parse(JSON.stringify(unitDimSettings));
     saveProjects();
   }
 }
@@ -1495,13 +1671,12 @@ function submitProjectForm() {
 
 function loadProject(id) {
   if (id === activeProjectId) return;
-  // Save current project's selections
   saveCurrentProject();
-  // Load new
   activeProjectId = id;
   const proj = projects.find(p => p.id === id);
   if (proj) {
     selections = { ...proj.selections };
+    unitDimSettings = proj.unitDimSettings ? JSON.parse(JSON.stringify(proj.unitDimSettings)) : {};
   }
   renderGrid();
   updateHeader();
