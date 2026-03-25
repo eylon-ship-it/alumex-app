@@ -1,0 +1,7 @@
+{
+  "name": "alumex-app",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npx live-server --port=3456 --no-browser"
+  }
+}
