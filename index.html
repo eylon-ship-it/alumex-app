@@ -848,16 +848,50 @@ function loadProjects() {
 
 // ─── Unit dim settings helpers ─────────────────────────────────
 function getUnitSettings(unitId) {
-  if (!unitDimSettings[unitId]) unitDimSettings[unitId] = { firstDrawerHeight: null, overrides: {} };
+  if (!unitDimSettings[unitId]) unitDimSettings[unitId] = { unitTotalHeight: null, firstDrawerHeight: null, overrides: {} };
   return unitDimSettings[unitId];
 }
+// Per-unit TOTAL height override (replaces firstDrawerHeight as main per-unit field)
+function getUnitTotalHeight(unitId) {
+  const us = unitDimSettings[unitId];
+  return (us && us.unitTotalHeight) ? parseInt(us.unitTotalHeight) : null;
+}
+function setUnitTotalHeight(unitId, val) {
+  getUnitSettings(unitId).unitTotalHeight = val ? parseInt(val) : null;
+  saveCurrentProject();
+}
+// Legacy — kept for backward compat
 function getUnitFirstDrawerHeight(unitId) {
   const us = unitDimSettings[unitId];
   return (us && us.firstDrawerHeight) ? us.firstDrawerHeight : null;
 }
 function setUnitFirstDrawerHeight(unitId, val) {
   getUnitSettings(unitId).firstDrawerHeight = val ? parseInt(val) : null;
-  saveProjects();
+  saveCurrentProject();
+}
+// Returns the effective total front height for a unit (per-unit override → project → catalog)
+function getEffectiveFrontHeight(unit) {
+  const unitTH = getUnitTotalHeight(unit.id);
+  if (unitTH) return unitTH;
+  const projectFH = getActiveFrontHeight();
+  if (projectFH) return projectFH;
+  return getCabinetHeight(unit);
+}
+// Front type helpers
+function getActiveFrontType() {
+  if (!activeProjectId) return null;
+  const proj = projects.find(p => p.id === activeProjectId);
+  return proj ? (proj.frontType || null) : null;
+}
+// Returns true if profile SKU should appear for the given front type
+// FD03/FD04 = הדבקה; FD01 = מסגרת; everything else = universal
+function profileMatchesFrontType(sku, frontType) {
+  if (!frontType) return true;
+  const ADHESION_ONLY = new Set(['FD03', 'FD04']);
+  const FRAME_ONLY    = new Set(['FD01']);
+  if (frontType === 'הדבקה' && FRAME_ONLY.has(sku))    return false;
+  if (frontType === 'מסגרת' && ADHESION_ONLY.has(sku)) return false;
+  return true;
 }
 function setDimOverride(unitId, key, val) {
   const s = getUnitSettings(unitId);
@@ -877,7 +911,7 @@ function getDimOverride(unitId, key, defaultVal) {
 function hasAnyOverrides(unitId) {
   const s = unitDimSettings[unitId];
   if (!s) return false;
-  return s.firstDrawerHeight || (s.overrides && Object.keys(s.overrides).length > 0);
+  return s.unitTotalHeight || s.firstDrawerHeight || (s.overrides && Object.keys(s.overrides).length > 0);
 }
 function clearUnitOverrides(unitId) {
   delete unitDimSettings[unitId];
@@ -1246,7 +1280,7 @@ function openDetail(id) {
       </span>
     </div>`;
 
-  const fh = getActiveFrontHeight();
+  const fh = getEffectiveFrontHeight(u);
   const fdh = getActiveFirstDrawerHeight();
   const scaledProfiles = getScaledProfiles(u, fh, fdh);
   document.getElementById('detailTable').innerHTML = buildCutTable(scaledProfiles, Math.max(qty, 1), qty, fh, u, fdh);
@@ -1260,7 +1294,7 @@ function changeQtyDetail(id, delta) {
   const u = unitsData.find(x => x.id === id);
   if (u) {
     const qty = selections[id] || 0;
-    const fh = getActiveFrontHeight();
+    const fh = getEffectiveFrontHeight(u);
     const fdh = getActiveFirstDrawerHeight();
     document.getElementById('detailTable').innerHTML = buildCutTable(getScaledProfiles(u, fh, fdh), Math.max(qty, 1), qty, fh, u, fdh);
   }
@@ -1271,7 +1305,7 @@ function changeQtyDetailInput(id, val) {
   const u = unitsData.find(x => x.id === id);
   if (u) {
     const qty = selections[id] || 0;
-    const fh = getActiveFrontHeight();
+    const fh = getEffectiveFrontHeight(u);
     const fdh = getActiveFirstDrawerHeight();
     document.getElementById('detailTable').innerHTML = buildCutTable(getScaledProfiles(u, fh, fdh), Math.max(qty, 1), qty, fh, u, fdh);
   }
@@ -1286,25 +1320,29 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh
   if (unit) {
     const uid = unit.id;
     const cabinetH   = getCabinetHeight(unit);
-    const totalH     = frontHeight || cabinetH;
+    // Per-unit total height takes priority over project frontHeight
+    const unitTH     = getUnitTotalHeight(uid);
+    const totalH     = unitTH || frontHeight || cabinetH;
     const unitWidth  = getUnitWidth(unit);
-    const unitFdh    = getUnitFirstDrawerHeight(uid);
-    const effectiveFdh = unitFdh || projectFdh;
+    const effectiveFdh = projectFdh; // first drawer height from project level only
     const frontData  = computeFrontHeights(unit, totalH, effectiveFdh);
     const hasOverrides = hasAnyOverrides(uid);
+    const frontType  = getActiveFrontType();
 
-    // ─── Per-unit firstDrawerHeight input ─────────────────────
-    if (frontData && frontData.length > 1) {
-      const fdhVal = unitFdh || '';
-      const fdhSet = !!unitFdh;
+    // ─── Per-unit total height input ─────────────────────────
+    if (frontData && frontData.length >= 1) {
+      const thSet = !!unitTH;
+      const thVal = unitTH || '';
+      const projFhHint = (frontHeight || cabinetH);
       html += `<div class="unit-fdh-row">
-        <span class="unit-fdh-label">גובה מגירה ראשונה (יחידה זו):</span>
-        <input class="unit-fdh-input${fdhSet ? ' set' : ''}" type="number"
-          id="ufdh_${uid}" value="${fdhVal}" min="50" max="500"
-          placeholder="${effectiveFdh || 'מהפרויקט'}"
-          oninput="onUnitFdhChange('${uid}',this.value)"
-          title="השאר ריק כדי לרשת מהפרויקט">
-        ${fdhSet ? `<button class="reset-overrides-btn" onclick="clearUnitFdh('${uid}')" title="חזור לערך הפרויקט">↺ נקה</button>` : ''}
+        <span class="unit-fdh-label">גובה חזית כולל (יחידה זו):</span>
+        <input class="unit-fdh-input${thSet ? ' set' : ''}" type="number"
+          id="uth_${uid}" value="${thVal}" min="400" max="1200"
+          placeholder="${projFhHint}"
+          oninput="_uthDebounce('${uid}',this)"
+          onchange="commitUnitTh('${uid}',this.value)"
+          title="גובה חזית כולל ליחידה זו — ריק = ירש מהפרויקט (${projFhHint} מ״מ)">
+        ${thSet ? `<button class="reset-overrides-btn" onclick="clearUnitTh('${uid}')" title="חזור לגובה הפרויקט">↺ נקה</button>` : ''}
       </div>`;
     }
 
@@ -1364,16 +1402,20 @@ function buildCutTable(profiles, qty, selectedQty, frontHeight, unit, projectFdh
     }
   }
 
-  // ─── Profiles ─────────────────────────────────────────────
-  if (profs.length) {
+  // ─── Profiles (filtered by front type) ───────────────────────
+  const activeFrontType = getActiveFrontType();
+  const filteredProfs = profs.filter(p => profileMatchesFrontType(p.sku, activeFrontType));
+  if (filteredProfs.length) {
     const uid = unit ? unit.id : null;
-    const fhNote = (unit && frontHeight && frontHeight !== getCabinetHeight(unit))
-      ? ` <span class="fh-badge">גובה חזית ${frontHeight} מ"מ</span>` : '';
-    html += `<h3 style="margin-top:16px">פרופילים לחיתוך${fhNote}</h3>
+    const effectiveTHForNote = unit ? getEffectiveFrontHeight(unit) : frontHeight;
+    const fhNote = (unit && effectiveTHForNote && effectiveTHForNote !== getCabinetHeight(unit))
+      ? ` <span class="fh-badge">גובה ${effectiveTHForNote} מ"מ</span>` : '';
+    const ftNote = activeFrontType ? ` <span style="font-size:10px;background:#EFF6FF;color:var(--primary);padding:2px 7px;border-radius:8px;font-weight:600">${activeFrontType}</span>` : '';
+    html += `<h3 style="margin-top:16px">פרופילים לחיתוך${fhNote}${ftNote}</h3>
     <table class="cut-table"><thead><tr>
       <th>מק"ט</th><th>תיאור</th><th>אורך מ"מ</th><th>כמות ליחידה</th><th>סה"כ</th>
     </tr></thead><tbody>`;
-    profs.forEach((p, pi) => {
+    filteredProfs.forEach((p, pi) => {
       const total = p.qty * qty;
       totalProfs += total;
       const pKey = uid ? `p${pi}_${p.sku}` : null;
@@ -1422,19 +1464,38 @@ function refreshDetailTable() {
   const u = unitsData.find(x => x.id === currentDetailId);
   if (!u) return;
   const qty = selections[currentDetailId] || 0;
-  const fh  = getActiveFrontHeight();
+  const fh  = getEffectiveFrontHeight(u);
   const fdh = getActiveFirstDrawerHeight();
   document.getElementById('detailTable').innerHTML =
     buildCutTable(getScaledProfiles(u, fh, fdh), Math.max(qty, 1), qty, fh, u, fdh);
 }
 
-function onUnitFdhChange(unitId, val) {
-  setUnitFirstDrawerHeight(unitId, val);
-  const el = document.getElementById(`ufdh_${unitId}`);
-  if (el) el.classList.toggle('set', !!val);
+// Debounce timer map for per-unit total-height input
+const _uthTimers = {};
+function _uthDebounce(unitId, input) {
+  // Immediate visual feedback (green border)
+  input.classList.toggle('set', !!(input.value && parseInt(input.value) > 0));
+  // Debounce the actual save + re-render
+  clearTimeout(_uthTimers[unitId]);
+  _uthTimers[unitId] = setTimeout(() => commitUnitTh(unitId, input.value), 900);
+}
+function commitUnitTh(unitId, val) {
+  clearTimeout(_uthTimers[unitId]);
+  setUnitTotalHeight(unitId, val);
+  const el = document.getElementById(`uth_${unitId}`);
+  if (el) el.classList.toggle('set', !!(val && parseInt(val) > 0));
+  refreshDetailTable();
+}
+function clearUnitTh(unitId) {
+  setUnitTotalHeight(unitId, null);
   refreshDetailTable();
 }
 
+// Legacy handlers kept for backward compat
+function onUnitFdhChange(unitId, val) {
+  setUnitFirstDrawerHeight(unitId, val);
+  refreshDetailTable();
+}
 function clearUnitFdh(unitId) {
   setUnitFirstDrawerHeight(unitId, null);
   refreshDetailTable();
@@ -1514,7 +1575,7 @@ function openSummary() {
   const lists = buildFactoryLists(active, fh, fdh);
 
   const projBar = proj
-    ? `${proj.name}${proj.magic ? ' · מגיק ' + proj.magic : ''}${proj.salesforce ? ' · ' + proj.salesforce : ''} · גובה חזית ${fh || 750} מ"מ`
+    ? `${proj.name}${proj.magic ? ' · מגיק ' + proj.magic : ''}${proj.salesforce ? ' · ' + proj.salesforce : ''} · ${proj.frontType || 'הדבקה'} · גובה ${fh || 750} מ"מ`
     : '';
 
   const tabs = [
@@ -1605,10 +1666,13 @@ function openSummary() {
 
 function buildSummaryData(active, frontHeight, firstDrawerHeight) {
   const map = new Map(); // key = sku+len+label
+  const activeFT = getActiveFrontType();
   active.forEach(u => {
     const qty = selections[u.id] || 0;
-    const profiles = getScaledProfiles(u, frontHeight, firstDrawerHeight);
+    const fh = getEffectiveFrontHeight(u); // per-unit height override
+    const profiles = getScaledProfiles(u, fh, firstDrawerHeight);
     profiles.forEach(p => {
+      if (!profileMatchesFrontType(p.sku, activeFT)) return; // front type filter
       const key = `${p.sku}|${p.len}|${p.label || ''}`;
       if (map.has(key)) {
         map.get(key).qty += p.qty * qty;
@@ -2113,10 +2177,13 @@ function buildFactoryLists(active, frontHeight, firstDrawerHeight) {
     else maps[cat].set(k, { ...item });
   }
 
+  const activeFT = getActiveFrontType(); // e.g. "הדבקה" or "מסגרת"
+
   active.forEach(u => {
     const qty = selections[u.id] || 0;
-    const fh  = frontHeight;
-    const fdh = (unitDimSettings[u.id]?.firstDrawerHeight) || firstDrawerHeight;
+    // Use per-unit effective height (honors per-unit override)
+    const fh  = getEffectiveFrontHeight(u);
+    const fdh = firstDrawerHeight; // project-level only
 
     // Panels
     const panels = computeScaledPanels(u, fh, fdh);
@@ -2129,9 +2196,10 @@ function buildFactoryLists(active, frontHeight, firstDrawerHeight) {
       else if (lbl.includes('חזית')) addPanel('front', item);
     });
 
-    // Profiles
+    // Profiles — filtered by project front type
     const profs = getScaledProfiles(u, fh, fdh);
     profs.forEach((p, pi) => {
+      if (!profileMatchesFrontType(p.sku, activeFT)) return; // skip mismatched type
       const vLen = getDimOverride(u.id, `p${pi}_${p.sku}`, p.len);
       const item = { sku: p.sku, label: p.label || profileDesc[p.sku] || '', len: vLen, qty: p.qty * qty };
       if (p.len === 0) {
