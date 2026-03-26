@@ -507,6 +507,48 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .rejects-empty{text-align:center;padding:40px 20px;color:#bbb;font-size:14px}
 .rejects-clear-btn{padding:5px 12px;background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s}
 .rejects-clear-btn:hover{background:#FEE2E2}
+/* ── KANBAN ─────────────────────────────────── */
+.kanban-page{padding:20px;display:flex;flex-direction:column;gap:20px;max-width:1300px;margin:0 auto}
+.kanban-header{padding:4px 0 8px}
+.kanban-title{font-size:22px;font-weight:700;color:var(--text)}
+.kanban-subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+.kanban-kpi-row{display:flex;gap:12px;flex-wrap:wrap}
+.kanban-kpi{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 18px;flex:1;min-width:130px;display:flex;flex-direction:column;gap:2px}
+.kanban-kpi-val{font-size:24px;font-weight:800;color:var(--primary)}
+.kanban-kpi-label{font-size:11px;color:var(--muted);font-weight:500}
+.kanban-board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.kanban-board{grid-template-columns:1fr}}
+.kanban-col{border-radius:14px;overflow:hidden;border:1px solid var(--border);background:#f8f9fb}
+.kanban-col-head{padding:14px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border)}
+.kanban-col-head.pending-orders{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE}
+.kanban-col-head.done-orders{background:#F0FDF4;color:#15803D;border-color:#BBF7D0}
+.kanban-col-head.pending-rejects{background:#FEF2F2;color:#B91C1C;border-color:#FCA5A5}
+.kanban-count-badge{min-width:22px;height:22px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;padding:0 6px}
+.kanban-count-badge.pending-orders{background:#DBEAFE;color:#1D4ED8}
+.kanban-count-badge.done-orders{background:#DCFCE7;color:#15803D}
+.kanban-count-badge.pending-rejects{background:#FEE2E2;color:#B91C1C}
+.kanban-cards{padding:10px;display:flex;flex-direction:column;gap:10px;min-height:60px}
+.kanban-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:box-shadow 0.15s}
+.kanban-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.09)}
+.kanban-card-title{font-size:13px;font-weight:700;color:var(--text)}
+.kanban-card-meta{display:flex;flex-wrap:wrap;gap:6px}
+.kanban-card-chip{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+.kanban-card-chip.date{background:#F1F5F9;color:#64748B}
+.kanban-card-chip.units{background:#EFF6FF;color:#1D4ED8}
+.kanban-card-chip.cost{background:#F0FDF4;color:#15803D}
+.kanban-card-chip.reason{background:#FEF3C7;color:#92400E;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kanban-card-chip.magic{background:#F3E8FF;color:#6B21A8}
+.kanban-card-actions{display:flex;gap:6px;margin-top:2px}
+.kanban-action-btn{flex:1;padding:5px 0;border-radius:7px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all 0.15s}
+.kanban-action-btn.complete{background:#16A34A;color:#fff;border-color:#16A34A}
+.kanban-action-btn.complete:hover{background:#15803D}
+.kanban-action-btn.reopen{background:#F1F5F9;color:#475569;border-color:#CBD5E1}
+.kanban-action-btn.reopen:hover{background:#E2E8F0}
+.kanban-action-btn.resolve{background:#7C3AED;color:#fff;border-color:#7C3AED}
+.kanban-action-btn.resolve:hover{background:#6D28D9}
+.kanban-action-btn.del{background:transparent;color:#EF4444;border-color:#FCA5A5;padding:5px 8px;flex:0}
+.kanban-action-btn.del:hover{background:#FEF2F2}
+.kanban-empty{text-align:center;padding:30px 16px;color:#bbb;font-size:12px}
 
 /* ── ADMIN PIN MODAL ── */
 .admin-pin-modal{max-width:360px}
@@ -714,6 +756,7 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
     <button class="tab-btn active" id="tab-catalog" onclick="switchTab('catalog')">קטלוג יחידות</button>
     <button class="tab-btn" id="tab-profiles" onclick="switchTab('profiles')">ניהול פרופילים ויחידות</button>
     <button class="tab-btn" id="tab-rejects" onclick="switchTab('rejects')">⚠️ ריגקטים</button>
+    <button class="tab-btn" id="tab-kanban" onclick="switchTab('kanban')">📋 ניהול פרויקטים</button>
     <button class="tab-btn" id="tab-dashboard" onclick="requestDashboard()" style="display:none">📊 דשבורד</button>
   </div>
 </div>
@@ -878,6 +921,43 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
         <div class="rejects-table-wrap">
           <div id="rejectsTableBody"></div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: KANBAN -->
+<div class="tab-page" id="page-kanban">
+  <div class="kanban-page">
+    <div class="kanban-header">
+      <div class="kanban-title">📋 ניהול פרויקטים</div>
+      <div class="kanban-subtitle">מעקב הזמנות וריגקטים — גרירה בין עמודות</div>
+    </div>
+    <div class="kanban-kpi-row" id="kanbanKpis"></div>
+    <div class="kanban-board">
+      <!-- Column 1: Pending Orders -->
+      <div class="kanban-col">
+        <div class="kanban-col-head pending-orders">
+          <span>🔵 הזמנות ממתינות לפירוק</span>
+          <span class="kanban-count-badge pending-orders" id="kanbanCountPending">0</span>
+        </div>
+        <div class="kanban-cards" id="kanbanColPending"></div>
+      </div>
+      <!-- Column 2: Completed Orders -->
+      <div class="kanban-col">
+        <div class="kanban-col-head done-orders">
+          <span>✅ הזמנות שהושלמו</span>
+          <span class="kanban-count-badge done-orders" id="kanbanCountDone">0</span>
+        </div>
+        <div class="kanban-cards" id="kanbanColDone"></div>
+      </div>
+      <!-- Column 3: Pending Rejects -->
+      <div class="kanban-col">
+        <div class="kanban-col-head pending-rejects">
+          <span>⚠️ ריגקטים ממתינים לפירוק</span>
+          <span class="kanban-count-badge pending-rejects" id="kanbanCountRejects">0</span>
+        </div>
+        <div class="kanban-cards" id="kanbanColRejects"></div>
       </div>
     </div>
   </div>
@@ -1699,6 +1779,7 @@ function switchTab(name) {
     }
     buildRejectsTab();
   }
+  if (name === 'kanban') buildKanban();
 }
 
 function requestDashboard() {
@@ -2764,6 +2845,7 @@ function saveRejectFromTab() {
 
   rejectLog.push({
     id: 'rej_' + Date.now(),
+    status: 'pending',
     date: document.getElementById('rtDate').value || new Date().toLocaleDateString('he-IL'),
     unitName: unitNameEl.value.trim(),
     unitCode: document.getElementById('rtUnitCode').value.trim(),
@@ -3242,6 +3324,144 @@ function switchFactoryTab(tabId) {
   document.querySelectorAll('.fpanel').forEach(p => p.classList.toggle('active', p.id === 'fp-' + tabId));
 }
 
+// ═══════════════════════════════════════════════
+//  KANBAN — PROJECT MANAGEMENT BOARD
+// ═══════════════════════════════════════════════
+function setOrderStatus(id, status) {
+  const ord = orderHistory.find(o => o.id === id);
+  if (ord) { ord.status = status; saveOrderHistory(); buildKanban(); }
+}
+
+function setRejectStatus(id, status) {
+  const rej = rejectLog.find(r => r.id === id);
+  if (rej) { rej.status = status; saveRejectLog(); buildKanban(); buildRejectsTab(); }
+}
+
+function deleteKanbanOrder(id) {
+  if (!confirm('למחוק הזמנה זו מהלוג?')) return;
+  orderHistory = orderHistory.filter(o => o.id !== id);
+  saveOrderHistory();
+  buildKanban();
+  const dashPage = document.getElementById('page-dashboard');
+  if (dashPage && dashPage.classList.contains('active')) buildDashboard();
+}
+
+function deleteKanbanReject(id) {
+  if (!confirm('למחוק ריגקט זה?')) return;
+  rejectLog = rejectLog.filter(r => r.id !== id);
+  saveRejectLog();
+  buildKanban();
+  buildRejectsTab();
+}
+
+function buildKanban() {
+  const pendingOrders = orderHistory.filter(o => (o.status || 'pending') === 'pending');
+  const doneOrders    = orderHistory.filter(o => o.status === 'completed');
+  const pendingRejects= rejectLog.filter(r => (r.status || 'pending') === 'pending');
+
+  // KPIs
+  const kpisEl = document.getElementById('kanbanKpis');
+  if (kpisEl) {
+    const totalCostPending = pendingOrders.reduce((s,o)=>s+(o.estimatedCost||0),0);
+    const totalCostDone    = doneOrders.reduce((s,o)=>s+(o.estimatedCost||0),0);
+    const totalRejectCost  = pendingRejects.reduce((s,r)=>s+(r.estimatedCost||0),0);
+    kpisEl.innerHTML = `
+      <div class="kanban-kpi">
+        <div class="kanban-kpi-val" style="color:#1D4ED8">${pendingOrders.length}</div>
+        <div class="kanban-kpi-label">הזמנות ממתינות</div>
+      </div>
+      <div class="kanban-kpi">
+        <div class="kanban-kpi-val" style="color:#1D4ED8">${totalCostPending>0?'₪'+totalCostPending.toLocaleString('he-IL'):'-'}</div>
+        <div class="kanban-kpi-label">שווי ממתין</div>
+      </div>
+      <div class="kanban-kpi">
+        <div class="kanban-kpi-val" style="color:#15803D">${doneOrders.length}</div>
+        <div class="kanban-kpi-label">הזמנות שהושלמו</div>
+      </div>
+      <div class="kanban-kpi">
+        <div class="kanban-kpi-val" style="color:#15803D">${totalCostDone>0?'₪'+totalCostDone.toLocaleString('he-IL'):'-'}</div>
+        <div class="kanban-kpi-label">שווי שהושלם</div>
+      </div>
+      <div class="kanban-kpi">
+        <div class="kanban-kpi-val" style="color:#B91C1C">${pendingRejects.length}</div>
+        <div class="kanban-kpi-label">ריגקטים פתוחים</div>
+      </div>
+      <div class="kanban-kpi">
+        <div class="kanban-kpi-val" style="color:#B91C1C">${totalRejectCost>0?'₪'+totalRejectCost.toLocaleString('he-IL'):'-'}</div>
+        <div class="kanban-kpi-label">עלות ריגקטים</div>
+      </div>
+    `;
+  }
+
+  // Badge counts
+  const countPending  = document.getElementById('kanbanCountPending');
+  const countDone     = document.getElementById('kanbanCountDone');
+  const countRejects  = document.getElementById('kanbanCountRejects');
+  if (countPending)  countPending.textContent  = pendingOrders.length;
+  if (countDone)     countDone.textContent     = doneOrders.length;
+  if (countRejects)  countRejects.textContent  = pendingRejects.length;
+
+  // Render order card
+  function renderOrderCard(o, isPending) {
+    const unitsSummary = (o.units||[]).slice(0,3).map(u=>`${u.name}×${u.qty}`).join(', ');
+    const moreUnits    = (o.units||[]).length > 3 ? ` +${(o.units||[]).length-3}` : '';
+    const costChip     = o.estimatedCost>0 ? `<span class="kanban-card-chip cost">₪${o.estimatedCost.toLocaleString('he-IL')}</span>` : '';
+    const magicChip    = o.magic ? `<span class="kanban-card-chip magic">${o.magic}</span>` : '';
+    const actionBtn    = isPending
+      ? `<button class="kanban-action-btn complete" onclick="setOrderStatus('${o.id}','completed')">✓ סמן כהושלם</button>`
+      : `<button class="kanban-action-btn reopen"   onclick="setOrderStatus('${o.id}','pending')">↩ החזר לממתין</button>`;
+    return `
+      <div class="kanban-card">
+        <div class="kanban-card-title">${o.projName||'—'}</div>
+        <div class="kanban-card-meta">
+          <span class="kanban-card-chip date">${o.date||''}</span>
+          <span class="kanban-card-chip units">${o.totalUnits||0} יחידות</span>
+          ${costChip}${magicChip}
+        </div>
+        ${unitsSummary ? `<div style="font-size:11px;color:#64748B;line-height:1.5">${unitsSummary}${moreUnits}</div>` : ''}
+        <div class="kanban-card-actions">
+          ${actionBtn}
+          <button class="kanban-action-btn del" onclick="deleteKanbanOrder('${o.id}')" title="מחק">✕</button>
+        </div>
+      </div>`;
+  }
+
+  // Render reject card
+  function renderRejectCard(r) {
+    const costChip = r.estimatedCost>0 ? `<span class="kanban-card-chip cost">₪${r.estimatedCost.toLocaleString('he-IL')}</span>` : '';
+    return `
+      <div class="kanban-card">
+        <div class="kanban-card-title">${r.unitName||'—'}</div>
+        <div class="kanban-card-meta">
+          <span class="kanban-card-chip date">${r.date||''}</span>
+          ${r.projName?`<span class="kanban-card-chip magic">${r.projName}</span>`:''}
+          ${costChip}
+        </div>
+        ${r.reason ? `<div style="font-size:11px;color:#92400E;line-height:1.5;background:#FEF3C7;padding:4px 8px;border-radius:6px;">${r.reason.slice(0,80)}${r.reason.length>80?'…':''}</div>` : ''}
+        <div class="kanban-card-actions">
+          <button class="kanban-action-btn resolve" onclick="setRejectStatus('${r.id}','resolved')">✓ סמן כטופל</button>
+          <button class="kanban-action-btn del" onclick="deleteKanbanReject('${r.id}')" title="מחק">✕</button>
+        </div>
+      </div>`;
+  }
+
+  const colPending  = document.getElementById('kanbanColPending');
+  const colDone     = document.getElementById('kanbanColDone');
+  const colRejects  = document.getElementById('kanbanColRejects');
+
+  if (colPending)  colPending.innerHTML  = pendingOrders.length
+    ? [...pendingOrders].reverse().map(o=>renderOrderCard(o,true)).join('')
+    : '<div class="kanban-empty">אין הזמנות ממתינות 👍</div>';
+
+  if (colDone)     colDone.innerHTML     = doneOrders.length
+    ? [...doneOrders].reverse().map(o=>renderOrderCard(o,false)).join('')
+    : '<div class="kanban-empty">אין הזמנות שהושלמו עדיין</div>';
+
+  if (colRejects)  colRejects.innerHTML  = pendingRejects.length
+    ? [...pendingRejects].reverse().map(r=>renderRejectCard(r)).join('')
+    : '<div class="kanban-empty">אין ריגקטים פתוחים 🎉</div>';
+}
+
 function archiveCurrentOrder() {
   const active = unitsData.filter(u => (selections[u.id] || 0) > 0);
   if (!active.length) return;
@@ -3266,6 +3486,7 @@ function archiveCurrentOrder() {
 
   const record = {
     id: 'ord_' + Date.now(),
+    status: 'pending',
     date: today,
     projName: proj ? proj.name : '—',
     projId: proj ? proj.id : null,
@@ -3285,6 +3506,8 @@ function archiveCurrentOrder() {
   // Update dashboard if open
   const dashPage = document.getElementById('page-dashboard');
   if (dashPage && dashPage.classList.contains('active')) buildDashboard();
+  const kanbanPage = document.getElementById('page-kanban');
+  if (kanbanPage && kanbanPage.classList.contains('active')) buildKanban();
   return true;
 }
 
