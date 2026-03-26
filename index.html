@@ -400,6 +400,45 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .fempty{text-align:center;padding:50px;color:var(--muted);font-size:15px}
 .sum-legacy-wrap{padding:20px;overflow-y:auto}
 
+/* ── REAR PANEL (דפנות וסינרים) ── */
+.rear-check-row{display:flex;align-items:center;gap:6px;padding:6px 0 2px;border-top:1px dashed #eee;margin-top:4px}
+.rear-check-row input[type=checkbox]{accent-color:var(--primary);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.rear-check-label{font-size:11px;color:#999;cursor:pointer;user-select:none;line-height:1.2}
+.card.rear-selected .rear-check-label{color:var(--primary);font-weight:600}
+.card.rear-selected{outline:2px dashed var(--primary);outline-offset:2px}
+.rear-tab-wrap{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.rear-section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
+.rear-table{width:100%;border-collapse:collapse;font-size:13px}
+.rear-table th{text-align:right;padding:8px 10px;font-size:11px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);background:#fafafa;white-space:nowrap}
+.rear-table td{padding:7px 8px;border-bottom:1px solid #f4f4f2;vertical-align:middle}
+.rear-table tbody tr:hover{background:#f8faff}
+.rear-desc-input{width:130px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;transition:border-color 0.15s;text-align:right}
+.rear-num-input{width:70px;padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;text-align:center;font-family:inherit;transition:border-color 0.15s}
+.rear-desc-input:focus,.rear-num-input:focus{outline:none;border-color:var(--primary)}
+.rear-num-input.warn-inp{border-color:#F59E0B;background:#FFFBEB}
+.rear-type-sel{padding:4px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;font-family:inherit;background:#fff;cursor:pointer}
+.rear-type-sel:focus{outline:none;border-color:var(--primary)}
+.rear-cut-cell{font-size:12px;line-height:1.6;min-width:120px}
+.rear-cut-line{display:inline-block;background:#EFF6FF;color:var(--primary);border-radius:5px;padding:2px 7px;font-weight:600;font-variant-numeric:tabular-nums;margin:1px 0;white-space:nowrap}
+.rear-cut-line.sec{background:#F4F4F2;color:#666}
+.rear-cut-line.warn{background:#FFFBEB;color:#D97706}
+.rear-btn-cell{display:flex;gap:4px;align-items:center}
+.rear-icon-btn{width:26px;height:26px;border:1px solid #e0e0e0;border-radius:6px;background:transparent;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:#888;padding:0}
+.rear-icon-btn:hover{border-color:var(--primary);color:var(--primary);background:#EFF6FF}
+.rear-icon-btn.del:hover{border-color:#EF4444;color:#EF4444;background:#FEF2F2}
+.rear-add-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px dashed #ccc;border-radius:8px;background:transparent;font-family:inherit;font-size:13px;color:#999;cursor:pointer;transition:all 0.15s;width:100%;justify-content:center}
+.rear-add-btn:hover{border-color:var(--primary);color:var(--primary);background:#EFF6FF}
+.rear-warn-banner{background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400E;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rear-warn-banner b{flex:1;min-width:180px}
+.rear-warn-btn{padding:4px 12px;border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;border:1px solid transparent}
+.rear-warn-yes{background:var(--primary);color:#fff}
+.rear-warn-no{background:#fff;border-color:#ccc;color:#555}
+.rear-empty{text-align:center;padding:40px 20px;color:#bbb;font-size:14px}
+.rear-sum-info{display:flex;gap:16px;flex-wrap:wrap;background:#EFF6FF;border-radius:10px;padding:12px 16px}
+.rear-sum-field{display:flex;flex-direction:column;gap:2px}
+.rear-sum-label{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
+.rear-sum-val{font-size:18px;font-weight:700;color:var(--primary)}
+
 /* ── NEW UNIT MODAL ── */
 #newUnitModal .modal-box{max-width:740px}
 #newUnitModal .modal-body{overflow-y:auto;padding:0}
@@ -914,6 +953,9 @@ let summaryFS = false;
 let projects = [];          // [{id, name, magic, salesforce, frontType, frontHeight, firstDrawerHeight, selections, unitDimSettings, createdAt}]
 let activeProjectId = null;
 let selectedFrontType = 'הדבקה';
+let rearSelections = {};   // {unitId: bool} — which units are included in rear panel
+let rearRows = [];         // [{id, desc, width, height, joinType, manualWidth, isManual}]
+let rearPendingChange = null; // {rowId, oldWidth, newWidth} when auto width changes but row has manual override
 
 // ═══════════════════════════════════════════════
 //  RUNTIME OVERRIDES (editable names)
@@ -957,6 +999,8 @@ function loadProjects() {
       if (proj) {
         selections = { ...proj.selections };
         unitDimSettings = proj.unitDimSettings ? JSON.parse(JSON.stringify(proj.unitDimSettings)) : {};
+        rearSelections = proj.rearSelections ? { ...proj.rearSelections } : {};
+        rearRows = proj.rearRows ? JSON.parse(JSON.stringify(proj.rearRows)) : [];
       }
     }
   } catch(e){}
@@ -1114,8 +1158,9 @@ function renderGrid() {
 
   grid.innerHTML = filtered.map(u => {
     const qty = selections[u.id] || 0;
+    const rearChecked = !!rearSelections[u.id];
     return `
-    <div class="card${qty > 0 ? ' selected' : ''}" id="card_${u.id}">
+    <div class="card${qty > 0 ? ' selected' : ''}${rearChecked ? ' rear-selected' : ''}" id="card_${u.id}">
       <div class="card-check">✓</div>
       <div class="card-img-wrap" onclick="openDetail('${u.id}')">
         <img class="card-img" src="${getUnitImgSrc(u)}" loading="lazy" alt="${u.name}">
@@ -1134,6 +1179,10 @@ function renderGrid() {
               onchange="setQtyFromInput('${u.id}',this.value)" onclick="this.select()">
             <button class="qty-btn plus" onclick="changeQty('${u.id}',1)">+</button>
           </div>
+        </div>
+        <div class="rear-check-row">
+          <input type="checkbox" id="rear_chk_${u.id}" ${rearChecked ? 'checked' : ''} onchange="toggleRearCheck('${u.id}')">
+          <label class="rear-check-label" for="rear_chk_${u.id}">כלול בסינר אחורי (${getUnitWidth(u)} מ"מ)</label>
         </div>
         <button class="detail-btn" onclick="openDetail('${u.id}')">פירוט חיתוך ▸</button>
       </div>
@@ -1694,12 +1743,14 @@ function openSummary() {
     ? `${proj.name}${proj.magic ? ' · מגיק ' + proj.magic : ''}${proj.salesforce ? ' · ' + proj.salesforce : ''} · ${proj.frontType || 'הדבקה'} · גובה ${fh || 750} מ"מ`
     : '';
 
+  const rearCount = Object.values(rearSelections).filter(Boolean).length;
   const tabs = [
     { id: 'loko',   label: 'לוקובונד + גב',       items: lists.loko,   type: 'panel'   },
     { id: 'front',  label: 'חזיתות פורצלן',       items: lists.front,  type: 'panel'   },
     { id: 'frame',  label: 'מסגרות + ידיות',      items: lists.frame,  type: 'profile' },
     { id: 'body',   label: 'גוף ופרופילים',        items: lists.body,   type: 'profile' },
     { id: 'drawer', label: 'פרופילי מגירות',      items: lists.drawer, type: 'profile' },
+    { id: 'rear',   label: `דפנות וסינרים${rearCount ? ` <span style="background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-right:4px">${rearCount}✓</span>` : ''}`, items: [], type: 'rear' },
     { id: 'overview', label: 'סיכום כללי',        items: [],           type: 'overview' },
   ];
 
@@ -1764,6 +1815,8 @@ function openSummary() {
     let content;
     if (t.type === 'overview') {
       content = `<div style="display:flex;flex-direction:column;gap:20px">${overviewContent}</div>`;
+    } else if (t.type === 'rear') {
+      content = buildRearTabHTML();
     } else if (t.type === 'panel') {
       content = buildFactoryPanelTable(t.items);
     } else {
@@ -2037,6 +2090,8 @@ function saveCurrentProject() {
   if (proj) {
     proj.selections = { ...selections };
     proj.unitDimSettings = JSON.parse(JSON.stringify(unitDimSettings));
+    proj.rearSelections = { ...rearSelections };
+    proj.rearRows = JSON.parse(JSON.stringify(rearRows));
     saveProjects();
   }
 }
@@ -2142,7 +2197,10 @@ function loadProject(id) {
   if (proj) {
     selections = { ...proj.selections };
     unitDimSettings = proj.unitDimSettings ? JSON.parse(JSON.stringify(proj.unitDimSettings)) : {};
+    rearSelections = proj.rearSelections ? { ...proj.rearSelections } : {};
+    rearRows = proj.rearRows ? JSON.parse(JSON.stringify(proj.rearRows)) : [];
   }
+  rearPendingChange = null;
   renderGrid();
   updateHeader();
   renderProjectHeader();
@@ -2278,6 +2336,222 @@ function confirmPin() {
     inp.value = '';
     setTimeout(() => { inp.classList.remove('error'); inp.focus(); }, 600);
   }
+}
+
+// ═══════════════════════════════════════════════
+//  REAR PANELS — דפנות וסינרים
+// ═══════════════════════════════════════════════
+
+function getRearAutoWidth() {
+  return unitsData
+    .filter(u => rearSelections[u.id])
+    .reduce((sum, u) => sum + getUnitWidth(u), 0);
+}
+
+function toggleRearCheck(unitId) {
+  rearSelections[unitId] = !rearSelections[unitId];
+  // Update card visual without full re-render
+  const card = document.getElementById('card_' + unitId);
+  if (card) card.classList.toggle('rear-selected', !!rearSelections[unitId]);
+  const chk = document.getElementById('rear_chk_' + unitId);
+  if (chk) chk.checked = !!rearSelections[unitId];
+
+  const newWidth = getRearAutoWidth();
+  // Update any auto "סינר אחורי" rows
+  rearRows.forEach(row => {
+    if (!row.isManual) {
+      if (!row.manualWidth) {
+        row.width = newWidth;
+      } else if (row.width !== newWidth) {
+        rearPendingChange = { rowId: row.id, oldWidth: row.width, newWidth };
+      }
+    }
+  });
+
+  // If summary modal + rear tab is active, re-render it
+  const rearPage = document.getElementById('fp-rear');
+  if (rearPage) {
+    rearPage.innerHTML = buildRearTabHTML();
+  }
+  // Update tab badge
+  const rearTabBtn = document.querySelector('[data-ftab="rear"]');
+  if (rearTabBtn) {
+    const cnt = Object.values(rearSelections).filter(Boolean).length;
+    rearTabBtn.innerHTML = `דפנות וסינרים${cnt ? ` <span style="background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-right:4px">${cnt}✓</span>` : ''}`;
+  }
+  saveCurrentProject();
+}
+
+function calcRearCuts(width, height, joinType) {
+  const w = parseInt(width) || 0;
+  const h = parseInt(height) || 0;
+  if (joinType === 'הדבקה') {
+    const isOdd = v => v % 1 !== 0 || v % 2 !== 0;
+    return {
+      primary:   { label: 'הדבקה', w: w - 4,  h: h - 13, warn: ((w-4) % 10 !== 0 || (h-13) % 10 !== 0) },
+      secondary: { label: 'מסגרת', w: w - 8,  h: h,      warn: ((w-8) % 10 !== 0 || h % 10 !== 0) },
+    };
+  } else {
+    return {
+      primary:   { label: 'מסגרת', w: w - 8,  h: h,      warn: ((w-8) % 10 !== 0 || h % 10 !== 0) },
+      secondary: { label: 'הדבקה', w: w - 4,  h: h - 13, warn: ((w-4) % 10 !== 0 || (h-13) % 10 !== 0) },
+    };
+  }
+}
+
+function rearRowId() { return 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+
+function addRearAutoRow() {
+  const autoWidth = getRearAutoWidth();
+  rearRows.push({ id: rearRowId(), desc: 'סינר אחורי', width: autoWidth || 600, height: 750, joinType: 'מסגרת', manualWidth: false, isManual: false });
+  saveCurrentProject();
+  const rearPage = document.getElementById('fp-rear');
+  if (rearPage) rearPage.innerHTML = buildRearTabHTML();
+}
+
+function addRearManualRow() {
+  rearRows.push({ id: rearRowId(), desc: 'דופן', width: 600, height: 750, joinType: 'מסגרת', manualWidth: true, isManual: true });
+  saveCurrentProject();
+  const rearPage = document.getElementById('fp-rear');
+  if (rearPage) rearPage.innerHTML = buildRearTabHTML();
+}
+
+function deleteRearRow(rowId) {
+  rearRows = rearRows.filter(r => r.id !== rowId);
+  saveCurrentProject();
+  const rearPage = document.getElementById('fp-rear');
+  if (rearPage) rearPage.innerHTML = buildRearTabHTML();
+}
+
+function splitRearRow(rowId) {
+  const idx = rearRows.findIndex(r => r.id === rowId);
+  if (idx < 0) return;
+  const row = rearRows[idx];
+  const halfW = Math.round((parseInt(row.width) || 0) / 2);
+  const rowA = { ...row, id: rearRowId(), desc: row.desc + ' א', width: halfW, manualWidth: true, isManual: true };
+  const rowB = { ...row, id: rearRowId(), desc: row.desc + ' ב', width: halfW, manualWidth: true, isManual: true };
+  rearRows.splice(idx, 1, rowA, rowB);
+  saveCurrentProject();
+  const rearPage = document.getElementById('fp-rear');
+  if (rearPage) rearPage.innerHTML = buildRearTabHTML();
+}
+
+function updateRearRowField(rowId, field, value) {
+  const row = rearRows.find(r => r.id === rowId);
+  if (!row) return;
+  if (field === 'width') {
+    row.width = parseInt(value) || 0;
+    row.manualWidth = true; // any manual edit locks the width
+  } else if (field === 'height') {
+    row.height = parseInt(value) || 0;
+  } else if (field === 'joinType') {
+    row.joinType = value;
+  } else if (field === 'desc') {
+    row.desc = value;
+  }
+  // Re-render just the cuts cell for this row
+  const cutsEl = document.getElementById('rear_cuts_' + rowId);
+  if (cutsEl) cutsEl.innerHTML = buildRearCutsHTML(row);
+  // Also update warning if needed
+  const warnEl = document.getElementById('rear_warn_banner');
+  if (warnEl) warnEl.innerHTML = buildRearWarnBannerHTML();
+  saveCurrentProject();
+}
+
+function acceptRearWidthChange(rowId) {
+  const row = rearRows.find(r => r.id === rowId);
+  if (row && rearPendingChange && rearPendingChange.rowId === rowId) {
+    row.width = rearPendingChange.newWidth;
+    row.manualWidth = false;
+    rearPendingChange = null;
+    saveCurrentProject();
+    const rearPage = document.getElementById('fp-rear');
+    if (rearPage) rearPage.innerHTML = buildRearTabHTML();
+  }
+}
+
+function dismissRearWidthChange(rowId) {
+  if (rearPendingChange && rearPendingChange.rowId === rowId) {
+    rearPendingChange = null;
+  }
+  const warnEl = document.getElementById('rear_warn_banner');
+  if (warnEl) warnEl.innerHTML = '';
+}
+
+function buildRearCutsHTML(row) {
+  const cuts = calcRearCuts(row.width, row.height, row.joinType);
+  const p = cuts.primary;
+  const s = cuts.secondary;
+  return `<div class="rear-cut-line${p.warn?' warn':''}">${row.joinType === 'הדבקה' ? 'הדבקה' : 'מסגרת'}: ${p.w} × ${p.h} מ"מ</div>
+          <div class="rear-cut-line sec">${row.joinType === 'הדבקה' ? 'מסגרת' : 'הדבקה'}: ${s.w} × ${s.h} מ"מ</div>`;
+}
+
+function buildRearWarnBannerHTML() {
+  if (!rearPendingChange) return '';
+  const { rowId, oldWidth, newWidth } = rearPendingChange;
+  return `<b>⚠️ רוחב הסינר השתנה מ-${oldWidth} ל-${newWidth} מ"מ. לעדכן?</b>
+    <button class="rear-warn-btn rear-warn-yes" onclick="acceptRearWidthChange('${rowId}')">כן</button>
+    <button class="rear-warn-btn rear-warn-no" onclick="dismissRearWidthChange('${rowId}')">השאר ידני</button>`;
+}
+
+function buildRearTabHTML() {
+  const autoWidth = getRearAutoWidth();
+  const checkedUnits = unitsData.filter(u => rearSelections[u.id]);
+  const totalRows = rearRows.length;
+
+  // Summary info bar
+  const sumBar = checkedUnits.length
+    ? `<div class="rear-sum-info">
+        <div class="rear-sum-field"><div class="rear-sum-label">ארונות מסומנים</div><div class="rear-sum-val">${checkedUnits.length}</div></div>
+        <div class="rear-sum-field"><div class="rear-sum-label">רוחב סינר אוטומטי</div><div class="rear-sum-val">${autoWidth} מ"מ</div></div>
+        <div class="rear-sum-field" style="flex:1;min-width:200px"><div class="rear-sum-label">יחידות מסומנות</div><div style="font-size:12px;color:#555;line-height:1.6;margin-top:2px">${checkedUnits.map(u=>`${u.name} <span style="color:#aaa">(${getUnitWidth(u)} מ"מ)</span>`).join(' · ')}</div></div>
+      </div>`
+    : `<div class="rear-empty" style="padding:16px;background:#fafafa;border-radius:10px;font-size:13px">
+        ⬅ סמן ✓ "כלול בסינר אחורי" על הארונות הרצויים בקטלוג כדי לחשב את רוחב הסינר אוטומטית
+      </div>`;
+
+  // Warning banner
+  const warnBanner = rearPendingChange
+    ? `<div class="rear-warn-banner" id="rear_warn_banner">${buildRearWarnBannerHTML()}</div>`
+    : `<div id="rear_warn_banner"></div>`;
+
+  // Table rows
+  let tableBody = '';
+  if (rearRows.length === 0) {
+    tableBody = `<tr><td colspan="6" class="rear-empty">אין שורות עדיין — לחץ "הוסף סינר/דופן" למטה</td></tr>`;
+  } else {
+    tableBody = rearRows.map(row => {
+      const widthWarn = !row.isManual && !row.manualWidth && autoWidth !== row.width;
+      return `<tr>
+        <td><input class="rear-desc-input" value="${escHtml(row.desc)}" onchange="updateRearRowField('${row.id}','desc',this.value)"></td>
+        <td><input class="rear-num-input${widthWarn?' warn-inp':''}" type="number" value="${row.width}" onchange="updateRearRowField('${row.id}','width',this.value)"></td>
+        <td><input class="rear-num-input" type="number" value="${row.height}" onchange="updateRearRowField('${row.id}','height',this.value)"></td>
+        <td><select class="rear-type-sel" onchange="updateRearRowField('${row.id}','joinType',this.value)">
+          <option${row.joinType==='מסגרת'?' selected':''}>מסגרת</option>
+          <option${row.joinType==='הדבקה'?' selected':''}>הדבקה</option>
+        </select></td>
+        <td class="rear-cut-cell" id="rear_cuts_${row.id}">${buildRearCutsHTML(row)}</td>
+        <td><div class="rear-btn-cell">
+          <button class="rear-icon-btn" title="פצל" onclick="splitRearRow('${row.id}')">⇌</button>
+          <button class="rear-icon-btn del" title="מחק" onclick="deleteRearRow('${row.id}')">✕</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const table = `<table class="rear-table">
+    <thead><tr>
+      <th>תיאור</th><th>רוחב (מ"מ)</th><th>גובה (מ"מ)</th><th>סוג</th><th>מידות חיתוך</th><th></th>
+    </tr></thead>
+    <tbody>${tableBody}</tbody>
+  </table>`;
+
+  const addBtns = `<div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="rear-add-btn" style="flex:1;min-width:160px" onclick="addRearAutoRow()">+ סינר אחורי (${autoWidth||'?'} מ"מ)</button>
+    <button class="rear-add-btn" style="flex:1;min-width:140px" onclick="addRearManualRow()">+ דופן / שורה ידנית</button>
+  </div>`;
+
+  return `<div class="rear-tab-wrap">${sumBar}${warnBanner}${table}${addBtns}</div>`;
 }
 
 // ═══════════════════════════════════════════════
