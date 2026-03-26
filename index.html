@@ -2611,6 +2611,37 @@ function buildFactoryLists(active, frontHeight, firstDrawerHeight) {
     });
   });
 
+  // ── Rear panels (דפנות וסינרים) → porcelain + lokobond ──────────
+  rearRows.forEach(row => {
+    const w = parseInt(row.width)  || 0;
+    const h = parseInt(row.height) || 0;
+    if (!w || !h) return;
+    const jt = row.joinType || 'מסגרת';
+
+    // Porcelain front cut dimensions (no 27mm handle deduction)
+    const porcelainLen = jt === 'הדבקה' ? w - 4  : w - 8;
+    const porcelainWid = jt === 'הדבקה' ? h - 13 : h;
+
+    addPanel('front', {
+      barcode: '—',
+      label: `חזית ${row.desc} (${jt})`,
+      len: porcelainLen,
+      width: porcelainWid,
+      qty: 1,
+    });
+
+    // For glue type: also add lokobond backing (same as front but -3 each side)
+    if (jt === 'הדבקה') {
+      addPanel('loko', {
+        barcode: '—',
+        label: `לוקובונד גב ${row.desc}`,
+        len: porcelainLen - 3,
+        width: porcelainWid - 3,
+        qty: 1,
+      });
+    }
+  });
+
   const sortPanel = arr => arr.sort((a,b) => (a.label.localeCompare(b.label)) || (b.len - a.len));
   const sortProf  = arr => arr.sort((a,b) => a.sku.localeCompare(b.sku) || (b.len - a.len));
 
