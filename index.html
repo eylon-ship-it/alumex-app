@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alumex — רשימת חיתוך</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Raleway:wght@200;300;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -23,9 +23,11 @@
 body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text);direction:rtl;overflow-x:hidden;min-height:100vh}
 
 /* ── HEADER ── */
-.header{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.logo{font-size:22px;font-weight:700;color:var(--primary);letter-spacing:-0.5px;white-space:nowrap}
-.logo span{color:#E63B2E}
+.header{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:68px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.logo{display:flex;flex-direction:column;justify-content:center;line-height:1;white-space:nowrap;gap:3px}
+.logo-main{font-family:'Raleway',sans-serif;font-weight:200;font-size:24px;color:#1a1a1a;letter-spacing:-0.5px;line-height:1;text-align:left;direction:ltr}
+.logo-sub{display:flex;align-items:center;gap:4px;direction:ltr}
+.logo-ok{font-family:'Raleway',sans-serif;font-weight:600;font-size:8.5px;letter-spacing:2.5px;text-transform:uppercase;color:#555}
 .header-spacer{flex:1}
 .summary-btn{display:flex;align-items:center;gap:8px;padding:8px 18px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:background 0.15s}
 .summary-btn:hover{background:var(--primary-dark)}
@@ -34,7 +36,7 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .clear-btn:hover{border-color:#ccc;color:#555}
 
 /* ── FILTER BAR ── */
-.filterbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:60px;z-index:99}
+.filterbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:68px;z-index:99}
 .cats{display:flex;gap:6px;flex-wrap:wrap}
 .cat-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--white);color:#555;white-space:nowrap;transition:all 0.15s}
 .cat-btn:hover{background:#f0f0ee}
@@ -256,7 +258,8 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
   #detailModal .modal-body{flex-direction:column}
   .detail-img-col{width:100%;border-left:none;border-bottom:1px solid var(--border)}
   .metrics{grid-template-columns:repeat(2,1fr)}
-  .logo{font-size:18px}
+  .logo-main{font-size:20px}
+  .logo-ok{font-size:7.5px}
 }
 @media print{
   .header,.filterbar,.modal-overlay:not(#summaryModal),.summary-actions,.factory-nav,.fpanel-header .fprint-btn{display:none!important}
@@ -270,19 +273,91 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
   .factory-table .qty-cell{font-size:26px}
 }
 /* ── LOGIN ── */
-#loginOverlay{position:fixed;inset:0;background:var(--primary);z-index:9999;display:flex;align-items:center;justify-content:center}
+/* ── LOGIN OVERLAY ── */
+#loginOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:stretch;justify-content:center;background:#F7F6F2}
 #loginOverlay.hidden{display:none}
-.login-box{background:#fff;border-radius:20px;padding:44px 36px;width:320px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-.login-logo{font-size:38px;font-weight:700;color:var(--primary);letter-spacing:-1px;margin-bottom:4px}
-.login-logo span{color:#E63B2E}
-.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
-.login-pin{width:100%;padding:14px;font-size:26px;text-align:center;border:2px solid var(--border);border-radius:10px;font-family:inherit;letter-spacing:10px;font-weight:700;outline:none;transition:border-color 0.15s}
-.login-pin:focus{border-color:var(--primary)}
+
+/* Left decorative panel */
+.login-panel-left{
+  flex:1;
+  background:linear-gradient(160deg,#1B4F8A 0%,#0f3460 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:60px;
+  position:relative;
+  overflow:hidden;
+}
+.login-panel-left::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.login-panel-tagline{
+  color:rgba(255,255,255,0.9);
+  font-size:15px;font-weight:300;letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:40px;font-family:'Raleway',sans-serif;
+}
+.login-panel-logo-big{position:relative;z-index:1;text-align:center}
+.login-brand-big{font-family:'Raleway',sans-serif;font-weight:200;font-size:80px;color:#fff;line-height:1;letter-spacing:-2px}
+.login-brand-sub-big{font-family:'Raleway',sans-serif;font-weight:600;font-size:14px;color:rgba(255,255,255,0.85);letter-spacing:2px;margin-top:6px;text-transform:uppercase}
+.login-brand-by{font-family:'Raleway',sans-serif;font-weight:300;font-size:13px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-top:4px}
+.login-brand-by em{font-style:normal;color:#c8908a;font-weight:600}
+.login-panel-deco{margin-top:68px;display:flex;gap:8px;position:relative;z-index:1}
+.login-panel-deco span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.25)}
+.login-panel-deco span:nth-child(2){background:rgba(255,255,255,0.55)}
+.login-panel-deco span:nth-child(3){background:#c8908a}
+
+/* Right form panel */
+.login-panel-right{
+  width:420px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 50px;background:#fff;
+  box-shadow:-20px 0 60px rgba(0,0,0,0.08);
+}
+.login-form-logo{margin-bottom:36px;text-align:center}
+.login-form-brand{font-family:'Raleway',sans-serif;font-weight:200;font-size:42px;color:#1a1a1a;letter-spacing:-1px;line-height:1}
+.login-form-brand-sub{font-family:'Raleway',sans-serif;font-weight:600;font-size:11px;letter-spacing:2.5px;color:#555;text-transform:uppercase;margin-top:5px}
+.login-form-brand-by{font-size:11px;color:#aaa;margin-top:3px;font-family:'Raleway',sans-serif;font-weight:300;letter-spacing:1px}
+.login-form-brand-by em{font-style:normal;color:#9C5C58;font-weight:600}
+.login-divider{width:40px;height:2px;background:linear-gradient(90deg,#1B4F8A,#9C5C58);border-radius:2px;margin:24px auto}
+.login-form-title{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px;text-align:center}
+.login-form-hint{font-size:12px;color:#aaa;margin-bottom:24px;text-align:center}
+
+/* PIN dots display */
+.login-dots{display:flex;gap:14px;justify-content:center;margin-bottom:20px}
+.login-dot{width:14px;height:14px;border-radius:50%;background:#E5E5E3;transition:all 0.2s}
+.login-dot.filled{background:var(--primary);transform:scale(1.1)}
+
+/* Hidden real input */
+.login-pin{
+  width:100%;padding:14px;font-size:26px;text-align:center;
+  border:2px solid var(--border);border-radius:12px;
+  font-family:inherit;letter-spacing:10px;font-weight:700;outline:none;
+  transition:border-color 0.15s,box-shadow 0.15s;background:#FAFAFA;
+  caret-color:var(--primary);
+}
+.login-pin:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(27,79,138,0.1);background:#fff}
 .login-pin.error{border-color:#EF4444;background:#fff5f5;animation:shake 0.3s}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.login-btn{width:100%;margin-top:14px;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background 0.15s}
-.login-btn:hover{background:var(--primary-dark)}
-.login-err{color:#EF4444;font-size:13px;margin-top:10px;min-height:18px}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.login-btn{
+  width:100%;margin-top:14px;padding:14px;
+  background:linear-gradient(135deg,#1B4F8A,#153d6b);
+  color:#fff;border:none;border-radius:12px;
+  font-family:inherit;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;
+  box-shadow:0 4px 15px rgba(27,79,138,0.3);
+}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(27,79,138,0.4)}
+.login-btn:active{transform:translateY(0)}
+.login-err{color:#EF4444;font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+.login-footer{margin-top:40px;font-size:11px;color:#ccc;text-align:center;font-family:'Raleway',sans-serif;letter-spacing:1px}
+
+/* Responsive: stack on small screens */
+@media(max-width:700px){
+  #loginOverlay{flex-direction:column}
+  .login-panel-left{flex:none;height:220px;padding:30px}
+  .login-brand-big{font-size:52px}
+  .login-panel-right{width:100%;flex:1;padding:36px 28px;box-shadow:none}
+}
 /* ── PIN CONFIRM ── */
 #pinModal .modal-box{max-width:360px}
 .pin-box{padding:24px;text-align:center}
@@ -375,18 +450,59 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 
 <!-- LOGIN OVERLAY -->
 <div id="loginOverlay" class="hidden">
-  <div class="login-box">
-    <div class="login-logo">Alum<span>ex</span></div>
-    <div class="login-sub">מערכת רשימת חיתוך — Alumex</div>
-    <input class="login-pin" type="password" id="loginPinInput" maxlength="4" inputmode="numeric" placeholder="• • • •" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off">
+
+  <!-- Left brand panel -->
+  <div class="login-panel-left">
+    <div class="login-panel-logo-big">
+      <div class="login-brand-big">Alumex</div>
+      <div class="login-brand-sub-big">Outdoor Kitchen</div>
+    </div>
+    <div class="login-panel-deco">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-panel-right">
+    <!-- Logo -->
+    <div class="login-form-logo">
+      <div class="login-form-brand">Alumex</div>
+      <div class="login-form-brand-sub">Outdoor Kitchen</div>
+    </div>
+
+    <div class="login-divider"></div>
+
+    <div class="login-form-title">כניסה למערכת</div>
+    <div class="login-form-hint">הזן קוד PIN בן 4 ספרות</div>
+
+    <!-- PIN dots indicator -->
+    <div class="login-dots">
+      <div class="login-dot" id="dot0"></div>
+      <div class="login-dot" id="dot1"></div>
+      <div class="login-dot" id="dot2"></div>
+      <div class="login-dot" id="dot3"></div>
+    </div>
+
+    <input class="login-pin" type="password" id="loginPinInput" maxlength="4" inputmode="numeric" placeholder="• • • •"
+      onkeydown="if(event.key==='Enter')doLogin()"
+      oninput="updateLoginDots(this.value)"
+      autocomplete="off">
     <button class="login-btn" onclick="doLogin()">כניסה</button>
     <div class="login-err" id="loginErr"></div>
+
+    <div class="login-footer">Alumex Outdoor Kitchen © 2025</div>
   </div>
+
 </div>
 
 <!-- HEADER -->
 <header class="header">
-  <div class="logo">Alum<span>ex</span></div>
+  <div class="logo">
+    <div class="logo-main">Alumex</div>
+    <div class="logo-sub">
+      <span class="logo-ok">Outdoor Kitchen</span>
+    </div>
+  </div>
   <div class="header-spacer"></div>
   <!-- Project Dropdown -->
   <div class="proj-dropdown-wrap" id="projDropWrap">
@@ -470,7 +586,7 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 <!-- TAB: CATALOG -->
 <div class="tab-page active" id="page-catalog">
   <!-- FILTER BAR -->
-  <div class="filterbar" style="position:sticky;top:60px">
+  <div class="filterbar" style="position:sticky;top:68px">
     <div class="cats" id="catBtns"></div>
     <div class="search-wrap">
       <input class="search-input" id="searchInput" placeholder="חיפוש יחידה..." oninput="renderGrid()">
@@ -2111,17 +2227,26 @@ function checkLogin() {
   }
 }
 
+function updateLoginDots(val) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    if (dot) dot.classList.toggle('filled', i < val.length);
+  }
+}
+
 function doLogin() {
   const inp = document.getElementById('loginPinInput');
   if (inp.value === APP_PIN) {
     sessionStorage.setItem('alumex_auth', '1');
     document.getElementById('loginOverlay').classList.add('hidden');
     inp.value = '';
+    updateLoginDots('');
     document.getElementById('loginErr').textContent = '';
   } else {
     document.getElementById('loginErr').textContent = 'קוד שגוי — נסה שנית';
     inp.classList.add('error');
     inp.value = '';
+    updateLoginDots('');
     setTimeout(() => { inp.classList.remove('error'); inp.focus(); }, 600);
   }
 }
