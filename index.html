@@ -34,6 +34,8 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .summary-btn .badge{background:rgba(255,255,255,0.25);border-radius:20px;padding:1px 8px;font-size:12px;font-weight:700}
 .clear-btn{padding:8px 14px;background:transparent;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s}
 .clear-btn:hover{border-color:#ccc;color:#555}
+.logout-btn{padding:6px 12px;border:1px solid #ddd;border-radius:8px;background:transparent;font-family:inherit;font-size:12px;color:#aaa;cursor:pointer;transition:all 0.15s}
+.logout-btn:hover{border-color:#EF4444;color:#EF4444;background:#FEF2F2}
 
 /* ── FILTER BAR ── */
 .filterbar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:68px;z-index:99}
@@ -439,6 +441,47 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
 .rear-sum-label{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.4px}
 .rear-sum-val{font-size:18px;font-weight:700;color:var(--primary)}
 
+/* ── DASHBOARD ── */
+.dash-page{padding:20px;display:flex;flex-direction:column;gap:20px;max-width:1200px;margin:0 auto}
+.dash-header{padding:4px 0 8px}
+.dash-title{font-size:22px;font-weight:700;color:var(--text)}
+.dash-subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+.dash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.dash-kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:4px}
+.dash-kpi-val{font-size:28px;font-weight:800;color:var(--primary)}
+.dash-kpi-val.warn{color:#D97706}
+.dash-kpi-val.red{color:#EF4444}
+.dash-kpi-label{font-size:12px;color:var(--muted);font-weight:500}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.dash-grid{grid-template-columns:1fr}}
+.dash-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 20px}
+.dash-card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.dash-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.dash-bar-label{font-size:12px;color:var(--text);width:180px;flex-shrink:0;text-align:right;line-height:1.3}
+.dash-bar-track{flex:1;height:12px;background:#F1F5F9;border-radius:6px;overflow:hidden}
+.dash-bar-fill{height:100%;background:var(--primary);border-radius:6px;transition:width 0.4s}
+.dash-bar-qty{font-size:12px;font-weight:700;color:var(--primary);min-width:30px}
+.dash-empty{text-align:center;padding:30px;color:#bbb;font-size:13px}
+.dash-orders-table{width:100%;border-collapse:collapse;font-size:12px}
+.dash-orders-table th{text-align:right;padding:6px 8px;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);background:#fafafa}
+.dash-orders-table td{padding:6px 8px;border-bottom:1px solid #f4f4f2;vertical-align:middle}
+.dash-orders-table tbody tr:hover{background:#f8faff}
+.dash-reject-table{width:100%;border-collapse:collapse;font-size:12px}
+.dash-reject-table th{text-align:right;padding:6px 8px;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);background:#fafafa}
+.dash-reject-table td{padding:6px 8px;border-bottom:1px solid #f4f4f2;vertical-align:middle}
+.dash-reject-add-btn{padding:5px 12px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.dash-reject-add-btn:hover{background:var(--primary-dark)}
+.dash-del-btn{width:22px;height:22px;border:1px solid #eee;border-radius:5px;background:transparent;cursor:pointer;font-size:11px;color:#ccc}
+.dash-del-btn:hover{border-color:#EF4444;color:#EF4444;background:#FEF2F2}
+/* ── REJECT MODAL ── */
+.reject-form{display:flex;flex-direction:column;gap:12px;padding:16px 20px}
+.reject-field{display:flex;flex-direction:column;gap:4px}
+.reject-field label{font-size:12px;font-weight:600;color:var(--muted)}
+.reject-input{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;transition:border-color 0.15s}
+.reject-input:focus{outline:none;border-color:var(--primary)}
+.reject-input.required-empty{border-color:#EF4444}
+.reject-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
 /* ── NEW UNIT MODAL ── */
 #newUnitModal .modal-box{max-width:740px}
 #newUnitModal .modal-body{overflow-y:auto;padding:0}
@@ -561,6 +604,7 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
   <button class="proj-new-btn" onclick="openNewProjectModal()">+ פרויקט חדש</button>
   <button class="proj-btn" onclick="openNewUnitModal()" style="background:#F59E0B;color:#fff;border-color:#F59E0B" title="הוסף יחידה חדשה לקטלוג">+ יחידה חדשה</button>
   <button class="clear-btn" onclick="clearAll()">נקה הכל</button>
+  <button class="logout-btn" onclick="doLogout()" title="התנתקות">⎋ יציאה</button>
   <button class="summary-btn" id="summaryBtn" onclick="openSummary()">
     סיכום <span class="badge" id="summaryBadge">0</span>
   </button>
@@ -605,6 +649,11 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
         <input type="text" id="projFieldFDH" placeholder="לפי קטלוג" inputmode="numeric" pattern="[0-9]*">
         <div class="field-hint">גובה מסגרת המגירה הקטנה ביותר — הפרמטר העיצובי שממנו נגזרות שאר המגירות.</div>
       </div>
+      <div class="proj-field">
+        <label>מחיר למ"ר חזית (₪)</label>
+        <input type="number" id="projFieldPrice" placeholder="800" min="0" step="10">
+        <div class="field-hint">מחיר פורצלן / חזית למ"ר — לחישוב עלות גלם בדשבורד</div>
+      </div>
       <input type="hidden" id="projEditId" value="">
       <div class="proj-form-actions">
         <button class="proj-cancel-btn" onclick="closeModal('projectModal')">ביטול</button>
@@ -619,6 +668,7 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
   <div class="tab-nav" style="flex:1">
     <button class="tab-btn active" id="tab-catalog" onclick="switchTab('catalog')">קטלוג יחידות</button>
     <button class="tab-btn" id="tab-profiles" onclick="switchTab('profiles')">ניהול פרופילים ויחידות</button>
+    <button class="tab-btn" id="tab-dashboard" onclick="switchTab('dashboard')">📊 דשבורד</button>
   </div>
 </div>
 
@@ -689,6 +739,34 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- TAB: DASHBOARD -->
+<div class="tab-page" id="page-dashboard">
+  <div class="dash-page">
+    <div class="dash-header">
+      <div class="dash-title">דשבורד ניהולי</div>
+      <div class="dash-subtitle">נתוני ייצור, מכירות וריגקטים — מצטבר</div>
+    </div>
+    <div class="dash-kpis" id="dashKpis"></div>
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dash-card-title">יחידות הכי מיוצרות</div>
+        <div class="dash-chart" id="dashTopUnits"></div>
+      </div>
+      <div class="dash-card">
+        <div class="dash-card-title">הזמנות אחרונות</div>
+        <div class="dash-orders" id="dashOrders"></div>
+      </div>
+    </div>
+    <div class="dash-card" style="margin:0 20px 20px">
+      <div class="dash-card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>לוג ריגקטים / קריאות שירות</span>
+        <button class="dash-reject-add-btn" onclick="openRejectModal()">+ תיעוד ריגקט</button>
+      </div>
+      <div id="dashRejectLog"></div>
+    </div>
   </div>
 </div>
 
@@ -831,6 +909,56 @@ body{font-family:'Heebo',Arial,sans-serif;background:var(--bg);color:var(--text)
   </div>
 </div>
 
+<!-- REJECT LOG MODAL -->
+<div class="modal-overlay" id="rejectModal" onclick="handleOverlayClick(event,'rejectModal')">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">תיעוד ריגקט / קריאת שירות</div>
+      <div class="modal-header-btns">
+        <button class="icon-btn" onclick="closeModal('rejectModal')">✕</button>
+      </div>
+    </div>
+    <div class="reject-form">
+      <div class="reject-field">
+        <label>שם יחידה *</label>
+        <input type="text" class="reject-input" id="rejectUnitName" placeholder="ארון אחסון תחתון..." autocomplete="off">
+      </div>
+      <div class="reject-row-2">
+        <div class="reject-field">
+          <label>מקט / קוד</label>
+          <input type="text" class="reject-input" id="rejectUnitCode" placeholder="STOR25_3M">
+        </div>
+        <div class="reject-field">
+          <label>פרויקט</label>
+          <input type="text" class="reject-input" id="rejectProjName" placeholder="שם הלקוח">
+        </div>
+      </div>
+      <div class="reject-field">
+        <label>סיבה / תיאור הבעיה *</label>
+        <textarea class="reject-input" id="rejectReason" rows="2" placeholder="תיאור הבעיה..."></textarea>
+      </div>
+      <div class="reject-row-2">
+        <div class="reject-field">
+          <label>עלות מוערכת (₪)</label>
+          <input type="number" class="reject-input" id="rejectCost" placeholder="0" min="0">
+        </div>
+        <div class="reject-field">
+          <label>תאריך</label>
+          <input type="text" class="reject-input" id="rejectDate" placeholder="">
+        </div>
+      </div>
+      <div class="reject-field">
+        <label>הערות</label>
+        <textarea class="reject-input" id="rejectNotes" rows="2" placeholder="הערות נוספות..."></textarea>
+      </div>
+    </div>
+    <div class="proj-form-actions" style="padding:12px 20px;border-top:1px solid var(--border)">
+      <button class="proj-cancel-btn" onclick="closeModal('rejectModal')">ביטול</button>
+      <button class="proj-submit-btn" style="flex:1" onclick="saveRejectEntry()">✓ שמור ריגקט</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════
 //  DATA
@@ -956,6 +1084,8 @@ let selectedFrontType = 'הדבקה';
 let rearSelections = {};   // {unitId: bool} — which units are included in rear panel
 let rearRows = [];         // [{id, desc, width, height, joinType, manualWidth, isManual}]
 let rearPendingChange = null; // {rowId, oldWidth, newWidth} when auto width changes but row has manual override
+let orderHistory = [];  // [{id, date, projName, projId, units, totalUnits, totalPanelArea, estimatedCost, frontType, frontHeight}]
+let rejectLog = [];     // [{id, date, unitName, unitCode, reason, estimatedCost, notes, projName}]
 
 // ═══════════════════════════════════════════════
 //  RUNTIME OVERRIDES (editable names)
@@ -1077,6 +1207,19 @@ function clearUnitOverrides(unitId) {
   delete unitDimSettings[unitId];
   saveProjects();
 }
+function saveOrderHistory() {
+  try { localStorage.setItem('alumex_order_history', JSON.stringify(orderHistory)); } catch(e){}
+}
+function loadOrderHistory() {
+  try { const s = localStorage.getItem('alumex_order_history'); if (s) orderHistory = JSON.parse(s); } catch(e){}
+}
+function saveRejectLog() {
+  try { localStorage.setItem('alumex_reject_log', JSON.stringify(rejectLog)); } catch(e){}
+}
+function loadRejectLog() {
+  try { const s = localStorage.getItem('alumex_reject_log'); if (s) rejectLog = JSON.parse(s); } catch(e){}
+}
+
 function saveProfileOverrides() {
   try { localStorage.setItem('alumex_profiles', JSON.stringify(profileDesc)); } catch(e){}
 }
@@ -1112,6 +1255,8 @@ function init() {
   loadUnitOverrides();
   loadCustomUnits();
   loadProjects();
+  loadOrderHistory();
+  loadRejectLog();
   if (!activeProjectId) loadStorage(); // fallback for legacy data
   renderCats();
   renderGrid();
@@ -1406,6 +1551,7 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   document.getElementById('page-' + name).classList.add('active');
   if (name === 'profiles') renderMgmtPage();
+  if (name === 'dashboard') buildDashboard();
 }
 
 // ═══════════════════════════════════════════════
@@ -2111,6 +2257,7 @@ function openNewProjectModal(editId) {
       document.getElementById('projFieldSF').value = proj.salesforce || '';
       document.getElementById('projFieldFH').value = proj.frontHeight || '';
       document.getElementById('projFieldFDH').value = proj.firstDrawerHeight || '';
+      document.getElementById('projFieldPrice').value = proj.pricePerSqm || '';
       selectedFrontType = proj.frontType || 'הדבקה';
     }
   } else {
@@ -2119,6 +2266,7 @@ function openNewProjectModal(editId) {
     document.getElementById('projFieldSF').value = '';
     document.getElementById('projFieldFH').value = '';
     document.getElementById('projFieldFDH').value = '';
+    document.getElementById('projFieldPrice').value = '';
     selectedFrontType = 'הדבקה';
   }
   // Update toggle UI
@@ -2151,6 +2299,7 @@ function submitProjectForm() {
   const frontHeight = fhVal ? parseInt(fhVal) : null;
   const fdhVal = document.getElementById('projFieldFDH').value.trim();
   const firstDrawerHeight = fdhVal ? parseInt(fdhVal) : null;
+  const pricePerSqm = parseFloat(document.getElementById('projFieldPrice').value) || null;
   const today = new Date().toLocaleDateString('he-IL');
 
   if (editId) {
@@ -2163,6 +2312,7 @@ function submitProjectForm() {
       proj.frontType = selectedFrontType;
       proj.frontHeight = frontHeight;
       proj.firstDrawerHeight = firstDrawerHeight;
+      proj.pricePerSqm = pricePerSqm;
     }
   } else {
     // New project — save current selections to current project first
@@ -2175,6 +2325,7 @@ function submitProjectForm() {
       frontType: selectedFrontType,
       frontHeight,
       firstDrawerHeight,
+      pricePerSqm,
       selections: {},
       createdAt: today
     };
@@ -2307,6 +2458,141 @@ function doLogin() {
     updateLoginDots('');
     setTimeout(() => { inp.classList.remove('error'); inp.focus(); }, 600);
   }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('alumex_auth');
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════
+//  ORDER HISTORY & REJECT LOG
+// ═══════════════════════════════════════════════
+
+function openRejectModal() {
+  const proj = getActiveProject();
+  document.getElementById('rejectUnitName').value = '';
+  document.getElementById('rejectUnitCode').value = '';
+  document.getElementById('rejectProjName').value = proj ? proj.name : '';
+  document.getElementById('rejectReason').value = '';
+  document.getElementById('rejectCost').value = '';
+  document.getElementById('rejectDate').value = new Date().toLocaleDateString('he-IL');
+  document.getElementById('rejectNotes').value = '';
+  document.querySelectorAll('.reject-input').forEach(el => el.classList.remove('required-empty'));
+  openModal('rejectModal');
+}
+
+function saveRejectEntry() {
+  const unitNameEl = document.getElementById('rejectUnitName');
+  const reasonEl = document.getElementById('rejectReason');
+  unitNameEl.classList.remove('required-empty');
+  reasonEl.classList.remove('required-empty');
+  let valid = true;
+  if (!unitNameEl.value.trim()) { unitNameEl.classList.add('required-empty'); valid = false; }
+  if (!reasonEl.value.trim()) { reasonEl.classList.add('required-empty'); valid = false; }
+  if (!valid) return;
+
+  rejectLog.push({
+    id: 'rej_' + Date.now(),
+    date: document.getElementById('rejectDate').value || new Date().toLocaleDateString('he-IL'),
+    unitName: unitNameEl.value.trim(),
+    unitCode: document.getElementById('rejectUnitCode').value.trim(),
+    projName: document.getElementById('rejectProjName').value.trim(),
+    reason: reasonEl.value.trim(),
+    estimatedCost: parseFloat(document.getElementById('rejectCost').value) || 0,
+    notes: document.getElementById('rejectNotes').value.trim(),
+  });
+  saveRejectLog();
+  closeModal('rejectModal');
+  // Refresh dashboard if open
+  if (document.getElementById('page-dashboard').classList.contains('active')) buildDashboard();
+}
+
+function deleteRejectEntry(id) {
+  rejectLog = rejectLog.filter(r => r.id !== id);
+  saveRejectLog();
+  if (document.getElementById('page-dashboard').classList.contains('active')) buildDashboard();
+}
+
+function deleteOrderEntry(id) {
+  orderHistory = orderHistory.filter(o => o.id !== id);
+  saveOrderHistory();
+  if (document.getElementById('page-dashboard').classList.contains('active')) buildDashboard();
+}
+
+// ═══════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════
+function buildDashboard() {
+  // KPIs
+  const totalOrders = orderHistory.length;
+  const totalUnitsProduced = orderHistory.reduce((s, o) => s + (o.totalUnits || 0), 0);
+  const totalMaterialCost = orderHistory.reduce((s, o) => s + (o.estimatedCost || 0), 0);
+  const totalRejectCost = rejectLog.reduce((s, r) => s + (r.estimatedCost || 0), 0);
+
+  document.getElementById('dashKpis').innerHTML = `
+    <div class="dash-kpi"><div class="dash-kpi-val">${totalOrders}</div><div class="dash-kpi-label">הזמנות מוגמרות</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val">${totalUnitsProduced}</div><div class="dash-kpi-label">ארונות יוצרו</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val warn">${totalMaterialCost ? '₪' + totalMaterialCost.toLocaleString() : '—'}</div><div class="dash-kpi-label">עלות גלם מצטברת</div></div>
+    <div class="dash-kpi"><div class="dash-kpi-val red">${totalRejectCost ? '₪' + totalRejectCost.toLocaleString() : '₪0'}</div><div class="dash-kpi-label">עלות ריגקטים / שירות</div></div>
+  `;
+
+  // Top units chart
+  const unitCounts = {};
+  orderHistory.forEach(o => {
+    (o.units || []).forEach(u => {
+      const k = u.name;
+      unitCounts[k] = (unitCounts[k] || 0) + u.qty;
+    });
+  });
+  const topUnits = Object.entries(unitCounts).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const maxQty = topUnits.length ? topUnits[0][1] : 1;
+
+  document.getElementById('dashTopUnits').innerHTML = topUnits.length
+    ? topUnits.map(([name, qty]) => `
+        <div class="dash-bar-row">
+          <div class="dash-bar-label">${name}</div>
+          <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${Math.round(qty/maxQty*100)}%"></div></div>
+          <div class="dash-bar-qty">${qty}</div>
+        </div>`).join('')
+    : '<div class="dash-empty">עדיין אין נתונים — הדפס הזמנה ראשונה</div>';
+
+  // Recent orders
+  const recentOrders = [...orderHistory].reverse().slice(0, 15);
+  document.getElementById('dashOrders').innerHTML = recentOrders.length
+    ? `<table class="dash-orders-table">
+        <thead><tr><th>תאריך</th><th>לקוח</th><th>מגיק</th><th>ארונות</th><th>עלות גלם</th><th></th></tr></thead>
+        <tbody>${recentOrders.map(o => `
+          <tr>
+            <td>${o.date}</td>
+            <td><b>${escHtml(o.projName)}</b></td>
+            <td style="color:#aaa">${o.magic || '—'}</td>
+            <td>${o.totalUnits}</td>
+            <td>${o.estimatedCost ? '₪' + o.estimatedCost.toLocaleString() : '—'}</td>
+            <td><button class="dash-del-btn" onclick="deleteOrderEntry('${o.id}')" title="מחק">✕</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`
+    : '<div class="dash-empty">אין הזמנות שמורות עדיין</div>';
+
+  // Reject log
+  const totalRejectCount = rejectLog.length;
+  document.getElementById('dashRejectLog').innerHTML = rejectLog.length
+    ? `<div style="margin-bottom:8px;font-size:12px;color:#888">${totalRejectCount} ריגקטים מתועדים · עלות כוללת: <b style="color:#EF4444">₪${totalRejectCost.toLocaleString()}</b></div>
+      <table class="dash-reject-table">
+        <thead><tr><th>תאריך</th><th>יחידה</th><th>פרויקט</th><th>סיבה</th><th>עלות</th><th></th></tr></thead>
+        <tbody>${[...rejectLog].reverse().map(r => `
+          <tr>
+            <td>${r.date}</td>
+            <td><b>${escHtml(r.unitName)}</b>${r.unitCode ? `<br><span style="font-size:10px;color:#aaa">${r.unitCode}</span>` : ''}</td>
+            <td>${escHtml(r.projName || '—')}</td>
+            <td>${escHtml(r.reason)}</td>
+            <td style="color:#EF4444;font-weight:700">${r.estimatedCost ? '₪' + r.estimatedCost.toLocaleString() : '—'}</td>
+            <td><button class="dash-del-btn" onclick="deleteRejectEntry('${r.id}')" title="מחק">✕</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`
+    : '<div class="dash-empty">אין ריגקטים מתועדים 🎉</div>';
 }
 
 // ═══════════════════════════════════════════════
@@ -2695,7 +2981,55 @@ function switchFactoryTab(tabId) {
   document.querySelectorAll('.fpanel').forEach(p => p.classList.toggle('active', p.id === 'fp-' + tabId));
 }
 
+function archiveCurrentOrder() {
+  const active = unitsData.filter(u => (selections[u.id] || 0) > 0);
+  if (!active.length) return;
+  const proj = getActiveProject();
+  const fh = getActiveFrontHeight() || 750;
+  const today = new Date().toLocaleDateString('he-IL');
+
+  // Calculate total panel area (m²) for cost estimate
+  let totalAreaM2 = 0;
+  active.forEach(u => {
+    const qty = selections[u.id] || 0;
+    const panels = computeScaledPanels(u, getEffectiveFrontHeight(u), getActiveFirstDrawerHeight());
+    panels.forEach(p => {
+      if ((p.label||'').includes('חזית')) {
+        totalAreaM2 += (p.len * p.width / 1000000) * qty;
+      }
+    });
+  });
+
+  const pricePerSqm = proj ? (proj.pricePerSqm || 0) : 0;
+  const estimatedCost = Math.round(totalAreaM2 * pricePerSqm);
+
+  const record = {
+    id: 'ord_' + Date.now(),
+    date: today,
+    projName: proj ? proj.name : '—',
+    projId: proj ? proj.id : null,
+    magic: proj ? proj.magic : '',
+    salesforce: proj ? proj.salesforce : '',
+    frontType: proj ? (proj.frontType || '—') : '—',
+    frontHeight: fh,
+    pricePerSqm,
+    units: active.map(u => ({ name: u.name, code: u.code, qty: selections[u.id] || 0 })),
+    totalUnits: active.reduce((s, u) => s + (selections[u.id] || 0), 0),
+    totalAreaM2: Math.round(totalAreaM2 * 100) / 100,
+    estimatedCost,
+  };
+
+  // Avoid duplicate archives in the same minute
+  const lastOrder = orderHistory[orderHistory.length - 1];
+  if (lastOrder && lastOrder.projId === record.projId && lastOrder.date === record.date &&
+      JSON.stringify(lastOrder.units) === JSON.stringify(record.units)) return;
+
+  orderHistory.push(record);
+  saveOrderHistory();
+}
+
 function printFactoryTab(tabId) {
+  archiveCurrentOrder(); // auto-archive on print
   document.querySelectorAll('.fpanel').forEach(p => p.classList.remove('print-me'));
   const page = document.getElementById('fp-' + tabId);
   if (page) { page.classList.add('print-me'); window.print(); page.classList.remove('print-me'); }
